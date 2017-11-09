@@ -124,7 +124,7 @@ machine and complete in a reasonable amount of time. Note that this rule prohibi
 machines in Soda or Cory Hall too (such as the Hive or Ashby machines). You are responsible for termi-
 nating your running process before starting a new one. Leaving processes running in the background is not
 an excuse to violate this policy. You will receive no credit for the project if you violate these requirements.
-You may**only** use free services (academic licenses are fine). We will link a Google form to anonymously
+You may **only** use free services (academic licenses are fine). We will link a Google form to anonymously
 report academic dishonesty on the project Piazza post.
 
 Note that we reserve the right to run the code submitted by any team, and that the code of the top 10
@@ -163,6 +163,6 @@ III. Once again, **remember to add your partners to the submission on Gradescope
 ## Grading
 
 Submitting output files in this phase is worth 15%. Each input file you are assigned will be worth an equal
-amount. For instance, if you are assigned 40 input files, each will be worth ($\frac{15}{40}$)%. You will **not** be tested
+amount. For instance, if you are assigned 40 input files, each will be worth **(15/40)%**. You will **not** be tested
 on your performance on the files in this phase, however, do note that it is in your favor to make an attempt
 to solve the assigned input files, since your input files are graded relative to those of other groups.
