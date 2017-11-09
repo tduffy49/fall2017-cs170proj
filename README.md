@@ -58,7 +58,7 @@ Each input file must adhere to the following specifications.
     `<Wizard1 Wizard2 Wizard3>`. Each constraint specifies that the age of `Wizard3` is not in
     between the ages of `Wizard1` and `Wizard2`. **Note: this does not mean `Wizard1` is necessarily
     younger than `Wizard2`.**
-- Eacg wizarad must appear *at least once* in your constraints.
+- Each wizard must appear *at least once* in your constraints.
 
 If your input files do not satisfy these requirements, then your input is considered invalid, and you will not
 receive any credit for this portion of the project. Although Gradescope will autograde your inputs, and print
