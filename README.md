@@ -31,33 +31,34 @@ due date. The difficulty of your input files will determine part of your grade f
 
 ## Details
 
-You will submit three input files. These files must be calledinput20.in,input35.inandinput50.in.
+You will submit three input files. These files must be called `input20.in`, `input35.in`, and `input50.in`.
 These files must be zipped inside a folder calledinputsand the zip must be submitted to Gradescope on
 the Phase I assignment. Throughout this project, only one group member needs to submit to Gradescope,
-however, remember toadd your partners on Gradescope.
+however, remember to **add your partners on Gradescope**.
 
-We are providing you with a Python Scriptinputvalidator.pyto validate your input files locally.
+We are providing you with a Python Script `inputvalidator.py` to validate your input files locally.
 The script runs in Python3, and it must be used as follows:
 
-python instance_validator.py [path to input file] [20, 35 or 50]
+`python instance_validator.py [path to input file] [20, 35 or 50]`
 
 CS 170, Fall 2017, Project 1
 
 
 Each input file must adhere to the following specifications.
 
-- The first line of each input file must be a single integerW, the number of wizards in your problem.
+- The first line of each input file must be a single integer *W*, the number of wizards in your problem.
     This number may be between 1 and (20, 35 or 50), depending on which input file you’re working on.
-    For instance,input20.inmust contain at most 20 wizards.
-- The second line of each input file must contain theWunique, alphanumeric wizard names, separated
+    For instance, `input20.in` must contain at most 20 wizards.
+- The second line of each input file must contain the *W* unique, alphanumeric wizard names, separated
     by a space. Each wizard name must be an alphanumeric string of maximum 10 characters. These
     space-separated wizard names must be an ordering of the wizards (according to their relative ages)
-- The third line of each input file must be a single integerC, the number of constraints in your problem.
+- The third line of each input file must be a single integer *C*, the number of constraints in your problem.
     This number may be between 1 and 500.
-- The nextClines of your input file must contain constraints of the form:
-    <Wizard1 Wizard2 Wizard3>. Each constraint specifies that the age ofWizard3is not in
-    between the ages ofWizard1andWizard2.Note: this does not mean **Wizard1** is necessarily
-    younger than **Wizard**.
+- The next *C* lines of your input file must contain constraints of the form:
+    `<Wizard1 Wizard2 Wizard3>`. Each constraint specifies that the age of `Wizard3` is not in
+    between the ages of `Wizard1` and `Wizard2`. **Note: this does not mean `Wizard1` is necessarily
+    younger than `Wizard2`.**
+- Eacg wizarad must appear *at least once* in your constraints.
 
 If your input files do not satisfy these requirements, then your input is considered invalid, and you will not
 receive any credit for this portion of the project. Although Gradescope will autograde your inputs, and print
@@ -66,12 +67,12 @@ formatted input files.
 
 ## Sample Input
 
-4
-Harry Hermione Severus Albus
-3
-Hermione Harry Severus
-Severus Harry Albus
-Severus Albus Hermione
+    4
+    Harry Hermione Severus Albus
+    3
+    Hermione Harry Severus
+    Severus Harry Albus
+    Severus Albus Hermione
 
 ## Grading
 
@@ -103,12 +104,12 @@ teams will receive extra credit. You must also submit your code and a write-up (
 ## Details
 
 After all input files have been submitted, we will release a subset of the harder problems in a zip file for you to
-run your algorithm on. We have released starter code to parse input files in the Python Scriptsolver.py.
+run your algorithm on. We have released starter code to parse input files in the Python Script `solver.py`.
 
 In this phase, you will submit output files for each input file released. Each output file must be named
-output#.outwhere#is the number of the corresponding input file. For instance, the output to the file
-input13.inmust be namedoutput13.out. All of your output files must be zipped in a folder named
-outputsand uploaded to Gradescope. We will provide you with a Python scriptoutputvalidator.py
+`output#.out` where *#* is the number of the corresponding input file. For instance, the output to the file
+`input13.in` must be named `output13.out`. All of your output files must be zipped in a folder named
+`outputs` and uploaded to Gradescope. We will provide you with a Python script `outputvalidator.py`
 that will validate the format of your output file, and print how many constraints you have satisfied for that
 problem. In addition, we will be running a live anonymous leader board for groups to see how they are
 doing in comparison to other groups in the class.
@@ -116,14 +117,14 @@ doing in comparison to other groups in the class.
 Your one-page write-up should describe your algorithm clearly. If you use non-standard libraries, you need
 to explicitly cite the libraries you used, instructions to install them, and explain why you chose to use those
 libraries. You must submit your code and write-up on Gradescope, along with the output files to receive any
-points for this phase. Be sure toinclude your partners on Gradescope.
+points for this phase. Be sure to **include your partners on Gradescope**.
 
-You may use any programming language you wish. However, your code must be able to run on onlyone
+You may use any programming language you wish. However, your code must be able to run on only **one**
 machine and complete in a reasonable amount of time. Note that this rule prohibits you from using multiple
 machines in Soda or Cory Hall too (such as the Hive or Ashby machines). You are responsible for termi-
 nating your running process before starting a new one. Leaving processes running in the background is not
 an excuse to violate this policy. You will receive no credit for the project if you violate these requirements.
-You mayonlyuse free services (academic licenses are fine). We will link a Google form to anonymously
+You may**only** use free services (academic licenses are fine). We will link a Google form to anonymously
 report academic dishonesty on the project Piazza post.
 
 Note that we reserve the right to run the code submitted by any team, and that the code of the top 10
@@ -131,7 +132,7 @@ teams will certainly be run by us.
 
 ## Sample Output
 
-Harry Hermione Severus Albus
+    Harry Hermione Severus Albus
 
 
 ## Grading
@@ -151,17 +152,17 @@ Release date: November 17th
 Due date:December 7th
 Deliverables: Output files for each input file assigned.
 
-In this phase, each group will be randomly assigned someotherinput files to run their solver on. The output
+In this phase, each group will be randomly assigned some *other* input files to run their solver on. The output
 in this phase will be used to grade the difficulty of the input files submitted by other students. You are not
 expected to modify your algorithm or code from Phase II, but instead to run your existing solver. Note that
 these input files will be released to you one week into Phase II, and you are free to work and submit outputs
 to these files during Phase II too. The output format in this phase is the same as Phase II, and you will name
 and zip the files in the same manner as in Phase II but will submit on an assignment corresponding to Phase
-III. Once again,remember to add your partners to the submission on Gradescope.
+III. Once again, **remember to add your partners to the submission on Gradescope**.
 
 ## Grading
 
 Submitting output files in this phase is worth 15%. Each input file you are assigned will be worth an equal
-amount. For instance, if you are assigned 40 input files, each will be worth(^1540 )%. You willnotbe tested
+amount. For instance, if you are assigned 40 input files, each will be worth ($\frac{15}{40}$)%. You will **not** be tested
 on your performance on the files in this phase, however, do note that it is in your favor to make an attempt
 to solve the assigned input files, since your input files are graded relative to those of other groups.
