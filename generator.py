@@ -60,7 +60,7 @@ def constraintGenDupes(n, numConstraints):
         s.add(c[2])
     if(len(s) != len(n)):
         print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
-        constraints = constraintGenNoDupes(n, numConstraints)
+        constraints = constraintGenDupes(n, numConstraints)
 
     return constraints
 
