@@ -2,7 +2,8 @@ from random import *
 import string
 def constraintGenNoDupes(n, numConstraints):
     """
-    input: n (list) - a list of ordered elements
+    input: n (list) - a list of ordered elements from [0 .. n) increments of 1
+            e.g. [0, 1, 2, 3, 4] for n = 5
     input : numConstraints (int) - the number of constraints to form from n
     ouput : a map of constraints of (first, second) : third where third is not
             between first and second. first, second cannot be duplicated pairs
@@ -35,7 +36,8 @@ def constraintGenNoDupes(n, numConstraints):
 
 def constraintGenDupes(n, numConstraints):
     """
-    input: n (list) - a list of ordered elements
+    input: n (list) - a list of ordered elements from [0 .. n) increments of 1
+            e.g. [0, 1, 2, 3, 4] for n = 5
     input : numConstraints (int) - the number of constraints to form from n
     ouput : a list of list of constraints [first, second, third] : where third is not between first and second. first,second can be duplicated pairs in the constraints
     """
