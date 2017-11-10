@@ -1,14 +1,14 @@
 from random import *
 import string
-def constraintGen(n, numConstraints):
+def constraintGenNoDupes(n, numConstraints):
     """
     input: n (list) - a list of ordered elements
     input : numConstraints (int) - the number of constraints to form from n
-    ouput : a map of constraints (first, second) : third where third is not
-            between first and second
+    ouput : a map of constraints of (first, second) : third where third is not
+            between first and second. first, second cannot be duplicated pairs
+            in the constraints
     """
     constraints = dict()
-    value = None
     rand = Random()
 
     while(len(constraints) < numConstraints):
@@ -27,22 +27,55 @@ def constraintGen(n, numConstraints):
         s.add(constraints[c])
     if(len(s) != len(n)):
         print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
-        constraints = constraintGen(n, numConstraints)
+        constraints = constraintGenNoDupes(n, numConstraints)
+
+    constraints = [[c[0], c[1], constraints[c]] for c in constraints]
+
+    return constraints
+
+def constraintGenDupes(n, numConstraints):
+    """
+    input: n (list) - a list of ordered elements
+    input : numConstraints (int) - the number of constraints to form from n
+    ouput : a list of list of constraints [first, second, third] : where third is not between first and second. first,second can be duplicated pairs in the constraints
+    """
+    constraints = []
+    rand = Random()
+
+    while(len(constraints) < numConstraints):
+        first = rand.randrange(len(n))
+        second = rand.randrange(len(n))
+        third = rand.randrange(len(n))
+
+        if(first <= third and second <= third or first >= third and second >= third):
+            constr = [first, second, third]
+            if(constr not in constraints):
+                constraints.append(constr)
+
+    #make sure every element in n is used at least once
+    s = set()
+    for c in constraints:
+        s.add(c[0])
+        s.add(c[1])
+        s.add(c[2])
+    if(len(s) != len(n)):
+        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
+        constraints = constraintGenNoDupes(n, numConstraints)
 
     return constraints
 
 def nameGen(constraints, n):
     """
-    input: constraints - map of (first, second) : third (all ints)
+    input: constraints - list of lists of [first, second, third] (all ints)
     output: Returns a tuple
-            element 0 : new map with each distinct integer within a range [0, n) in constraints coverted into a distint random name
-            element 1 : an ordered list of the new name mappings
-
+            element 0 : an ordered list of the new name mappings
+            element 1 : new list with each distinct integer within a range [0, n) in constraints converted into a distinct random name
     """
+
     asciiVals = "{0}{1}".format(string.ascii_letters, string.digits)
     names = []
     rand = Random()
-    newNames = dict()
+    newNames = []
 
     while len(names) < n:
         name = []
@@ -52,15 +85,16 @@ def nameGen(constraints, n):
         if("".join(name) not in names):
             names.append("".join(name))
 
-    for key in constraints:
-        newNames[(names[key[0]], names[key[1]])] = names[constraints[key]]
+    for c in constraints:
+        newNames.append([names[c[0]], names[c[1]], names[c[2]]])
 
-    return newNames , names
+    return names, newNames
 
 def outputToFile(ordering, constraints, filename):
     """
     input: ordering - a list containing the names in proper order
-    input: constraints - a map of (first, second) : third constraints
+    input: constraints - a list of lists of the form [first, second, third]
+                        constraints
     input: filename - a string with the name of the output file
     output: writes the correct format to filename
     """
@@ -74,4 +108,4 @@ def outputToFile(ordering, constraints, filename):
         f.write("\n{0}\n".format(len(constraints)))
 
         for c in constraints:
-            f.write("{0} {1} {2}\n".format(c[0], c[1], constraints[c]))
+            f.write("{0} {1} {2}\n".format(c[0], c[1], c[2]))
