@@ -4,7 +4,8 @@ Fall 2017 CS170 Project
 
 # Fall 2017 Prasad Raghavendra and Sanjam Garg Project
 
-Release date: November 3, 2017. Updated as of: November 3, 2:45 PM.
+    Release date: November 3, 2017. 
+    Updated as of: November 3, 2:45 PM.
 
 # Introduction
 
@@ -22,9 +23,8 @@ shared with your partner(s). All due dates are at 11:59 PM, PST.
 # Phase I: Input Files
 
 ## Overview
-
-###### Due date: **November 10th**
-###### Deliverables: Each group must submit three input files.
+    Due date: November 10th
+    Deliverables: Each group must submit three input files.
 
 We will collect all of your input files and release a subset of the hardest problems publicly after the phase I
 due date. The difficulty of your input files will determine part of your grade for this phase.
@@ -90,10 +90,9 @@ each file, the grading follows as below:
 # Phase II: Algorithm Implementation and Write-Up
 
 ## Overview
-
-###### Release date: November 13th
-###### Due date: **December 1st**
-###### Deliverables: Output files for each input file released, your solution code, and a write-up of your methods.
+    Release date: November 13th
+    Due date: December 1st
+    Deliverables: Output files for each input file released, your solution code, and a write-up of your methods.
 
 You will design an algorithm to figure out the relative ordering of as many wizards as possible and run
 it on the given pool of input files. Of course, a perfect ordering that satisfies all constraints does exist, since
@@ -147,10 +146,9 @@ will be graded on style, and the corresponding write up.
 # Phase III: Peer-grade input files
 
 ## Overview
-
-###### Release date: November 17th
-###### Due date: **December 7th**
-###### Deliverables: Output files for each input file assigned.
+    Release date: November 17th
+    Due date: December 7th
+    Deliverables: Output files for each input file assigned.
 
 In this phase, each group will be randomly assigned some *other* input files to run their solver on. The output
 in this phase will be used to grade the difficulty of the input files submitted by other students. You are not
