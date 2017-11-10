@@ -18,6 +18,17 @@ def constraintGen(n, numConstraints):
 
         if(first <= third and second <= third or first >= third and second >= third):
             constraints[(first, second)] = third
+
+    #make sure every element in n is used at least once
+    s = set()
+    for c in constraints:
+        s.add(c[0])
+        s.add(c[1])
+        s.add(constraints[c])
+    if(len(s) != len(n)):
+        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
+        constraints = constraintGen(n, numConstraints)
+
     return constraints
 
 def nameGen(constraints, n):
