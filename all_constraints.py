@@ -34,13 +34,13 @@ def randomly_select_constraints(constraints, n):
     selected = []
     for _ in range(n):
         index = random.randint(0, len(c))
-        c = c.pop(index) # Do not add the same constraints.
-        selected.append(c)
+        elem = c.pop(index) # Do not add the same constraints.
+        selected.append(elem)
     return selected
 
 def find_duplicates1(constraints, n):
     """
-    Find n duplicates of type (a, a, b)
+    From randomly picked (a, b, c) create duplicate of type (a, a, c)
 
     :param constraints: list of constraints in form [ (a, b, c) .... ]
     :param n: number of duplicate constraints to find
@@ -50,31 +50,54 @@ def find_duplicates1(constraints, n):
     duplicates = []
     for _ in range(n):
         i = random.randint(0, len(c))
-        duplicates
+        elem = c.pop(i)
+        duplicates.append((elem[0], elem[0], elem[2]))
+    return duplicates
 
 def find_duplicates2(constraints, n):
     """
-     Find n duplicates of type (b, a, a)
+     From randomly picked (a, b, c) create duplicate of type (a, c, c)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
      :return: `n`-sized list of duplicates
      """
+    c = list(constraints)
+    duplicates = []
+    for _ in range(n):
+        i = random.randint(0, len(c))
+        elem = c.pop(i)
+        duplicates.append((elem[0], elem[2], elem[2]))
+    return duplicates
 
 def find_duplicates3(constraints, n):
     """
-     Find n duplicates of type (a, b, a)
+     From randomly picked (a, b, c) create duplicate of type (a, c, a)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
      :return: `n`-sized list of duplicates
      """
+    c = list(constraints)
+    duplicates = []
+    for _ in range(n):
+        i = random.randint(0, len(c))
+        elem = c.pop(i)
+        duplicates.append((elem[0], elem[2], elem[0]))
+    return duplicates
 
 def find_duplicates4(constraints, n):
     """
-     Find n duplicates of type (a, a, a)
+     From randomly picked (a, b, c) create duplicates of type (a, a, a)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
      :return: `n`-sized list of duplicates
      """
+    c = list(constraints)
+    duplicates = []
+    for _ in range(n):
+        i = random.randint(0, len(c))
+        elem = c.pop(i)
+        duplicates.append((elem[0], elem[0], elem[0]))
+    return duplicates
