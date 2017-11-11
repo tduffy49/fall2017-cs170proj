@@ -1,4 +1,6 @@
 import random
+import sys
+import utils
 
 def generate_all_constraints(lst):
     """
@@ -19,8 +21,11 @@ def generate_all_constraints(lst):
                     constraints.append((lst[j], lst[k], lst[i]))
         for j in range(i + 1, len(lst)):
             for k in range(i + 1, j):
-                constraints.append((lst[k], lst[j], lst[i]))
-                constraints.append((lst[j], lst[k], lst[i]))
+                rand = random.random()
+                if rand > 0.5:
+                    constraints.append((lst[k], lst[j], lst[i]))
+                else:
+                    constraints.append((lst[j], lst[k], lst[i]))
     return constraints
 
 def randomly_select_constraints(constraints, n):
@@ -30,12 +35,12 @@ def randomly_select_constraints(constraints, n):
     :param n: number of constraints selected
     :return: n-sized list of randomly picked elements from `constraints`
     """
-    c = list(constraints)
+    constraints_copy = list(constraints)
     selected = []
-    for _ in range(n):
-        index = random.randint(0, len(c))
-        elem = c.pop(index) # Do not add the same constraints.
-        selected.append(elem)
+    for i in range(n):
+        index = random.randrange(len(constraints_copy))
+        c = constraints_copy.pop(index)
+        selected.append(c)
     return selected
 
 def all_wizards(constraints, n):
@@ -117,3 +122,31 @@ def find_duplicates4(constraints, n):
         duplicates.append((elem[0], elem[0], elem[0]))
     return duplicates
 
+def inject_duplicates(constraints, n, form):
+    for i in range(n):
+        index = random.randint(0, len(constraints))
+        triplet = constraints[index]
+        i, j, k = form
+        constraints[index] = (triplet[i], triplet[j], triplet[k])
+    
+def inject_all_duplicates(constraints):
+    for form in [(0, 0, 2), (0, 2, 2), (0, 2, 0), (0, 0, 0)]:
+        inject_duplicates(constraints, int(len(constraints) * 0.005), form)
+    
+def main():
+    num_constraints = 500
+    for lst_length in [20, 35, 50]:
+        names, _ = utils.nameGen([], lst_length)
+
+        all_possibilities = generate_all_constraints(names)
+        constraints = randomly_select_constraints(all_possibilities, num_constraints)
+        while (not all_wizards(constraints, lst_length)):
+            constraints = randomly_select_constraints(all_possibilities, num_constraints)
+
+        inject_all_duplicates(constraints)
+
+        assert(len(constraints) == num_constraints)
+        utils.outputToFile(names, constraints, "input" + str(lst_length) + ".in")
+
+if __name__ == "__main__":
+    main()

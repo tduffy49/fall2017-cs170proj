@@ -1,0 +1,2 @@
+To output, run:
+`python all_constraints.py`

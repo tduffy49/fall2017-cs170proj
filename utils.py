@@ -1,4 +1,4 @@
-from random import *
+import random
 import string
 
 def nameGen(constraints, n):
@@ -11,14 +11,13 @@ def nameGen(constraints, n):
 
     ascii_vals = "{0}{1}".format(string.ascii_letters, string.digits)
     names = []
-    rand = Random()
     newNames = []
 
     while len(names) < n:
         name = []
-        nameSize = rand.randrange(1,11)
+        nameSize = random.randrange(1,11)
         for letter in range(nameSize):
-            name.append(ascii_vals[rand.randrange(len(ascii_vals))])
+            name.append(ascii_vals[random.randrange(len(ascii_vals))])
         if("".join(name) not in names):
             names.append("".join(name))
 
