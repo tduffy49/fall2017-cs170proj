@@ -30,12 +30,14 @@ def randomly_select_constraints(constraints, n):
     :param n: number of constraints selected
     :return: n-sized list of randomly picked elements from `constraints`
     """
+    c = list(constraints)
     selected = []
-    for i in range(n):
-        index = random.randint(0, len(constraints))
-        c = constraints.pop(index)
+    for _ in range(n):
+        index = random.randint(0, len(c))
+        c = c.pop(index) # Do not add the same constraints.
         selected.append(c)
     return selected
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 constraints = generate_all_constraints(range(1, 51))
@@ -65,3 +67,46 @@ def randomly_select_all_wizards(constraints, n):
     return lst
 =======
 >>>>>>> 253ec4a757a4f0385438600c505441d1deabee9d
+=======
+
+def find_duplicates1(constraints, n):
+    """
+    Find n duplicates of type (a, a, b)
+
+    :param constraints: list of constraints in form [ (a, b, c) .... ]
+    :param n: number of duplicate constraints to find
+    :return: `n`-sized list of duplicates
+    """
+    c = list(constraints)
+    duplicates = []
+    for _ in range(n):
+        i = random.randint(0, len(c))
+        duplicates
+
+def find_duplicates2(constraints, n):
+    """
+     Find n duplicates of type (a, a, b)
+
+     :param constraints: list of constraints in form [ (a, b, c) .... ]
+     :param n: number of duplicate constraints to find
+     :return: `n`-sized list of duplicates
+     """
+
+def find_duplicates3(constraints, n):
+    """
+     Find n duplicates of type (a, a, b)
+
+     :param constraints: list of constraints in form [ (a, b, c) .... ]
+     :param n: number of duplicate constraints to find
+     :return: `n`-sized list of duplicates
+     """
+
+def find_duplicates4(constraints, n):
+    """
+     Find n duplicates of type (a, a, b)
+
+     :param constraints: list of constraints in form [ (a, b, c) .... ]
+     :param n: number of duplicate constraints to find
+     :return: `n`-sized list of duplicates
+     """
+>>>>>>> d18c5cd41c18785fe34fd85d4cf550dc1a6689c5
