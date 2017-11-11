@@ -54,7 +54,7 @@ def find_duplicates1(constraints, n):
 
 def find_duplicates2(constraints, n):
     """
-     Find n duplicates of type (a, a, b)
+     Find n duplicates of type (b, a, a)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
@@ -63,7 +63,7 @@ def find_duplicates2(constraints, n):
 
 def find_duplicates3(constraints, n):
     """
-     Find n duplicates of type (a, a, b)
+     Find n duplicates of type (a, b, a)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
@@ -72,7 +72,7 @@ def find_duplicates3(constraints, n):
 
 def find_duplicates4(constraints, n):
     """
-     Find n duplicates of type (a, a, b)
+     Find n duplicates of type (a, a, a)
 
      :param constraints: list of constraints in form [ (a, b, c) .... ]
      :param n: number of duplicate constraints to find
