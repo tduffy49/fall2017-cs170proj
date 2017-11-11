@@ -1,7 +1,7 @@
 import random
 import string
 
-def nameGen(constraints, n):
+def name_gen(constraints, n):
     """
     input: constraints - list of lists of [first, second, third] (all ints)
     output: Returns a tuple
@@ -26,7 +26,7 @@ def nameGen(constraints, n):
 
     return names, newNames
 
-def outputToFile(ordering, constraints, filename):
+def output_to_file(ordering, constraints, filename):
     """
     input: ordering - a list containing the names in proper order
     input: constraints - a list of lists of the form [first, second, third]

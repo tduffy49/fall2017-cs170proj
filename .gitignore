@@ -1,7 +1,10 @@
 # Ignore all OSX hidden files
 *.DS_Store
+
+# Ignore text editor
 .idea/*
+
+# Ignore generated input files
 input20.in
 input35.in
 input50.in
-generate.py
