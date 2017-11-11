@@ -2,8 +2,7 @@ from random import *
 import string
 def constraintGenNoDupes(n, numConstraints):
     """
-    input: n (list) - a list of ordered elements from [0 .. n) increments of 1
-            e.g. [0, 1, 2, 3, 4] for n = 5
+    input: n (int): number of unique elements
     input : numConstraints (int) - the number of constraints to form from n
     ouput : a map of constraints of (first, second) : third where third is not
             between first and second. first, second cannot be duplicated pairs
@@ -13,9 +12,9 @@ def constraintGenNoDupes(n, numConstraints):
     rand = Random()
 
     while(len(constraints) < numConstraints):
-        first = rand.randrange(len(n))
-        second = rand.randrange(len(n))
-        third = rand.randrange(len(n))
+        first = rand.randrange(n)
+        second = rand.randrange(n)
+        third = rand.randrange(n)
 
         if(first <= third and second <= third or first >= third and second >= third):
             constraints[(first, second)] = third
@@ -26,8 +25,8 @@ def constraintGenNoDupes(n, numConstraints):
         s.add(c[0])
         s.add(c[1])
         s.add(constraints[c])
-    if(len(s) != len(n)):
-        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
+    if(len(s) != n):
+        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), n))
         constraints = constraintGenNoDupes(n, numConstraints)
 
     constraints = [[c[0], c[1], constraints[c]] for c in constraints]
@@ -36,8 +35,7 @@ def constraintGenNoDupes(n, numConstraints):
 
 def constraintGenDupes(n, numConstraints):
     """
-    input: n (list) - a list of ordered elements from [0 .. n) increments of 1
-            e.g. [0, 1, 2, 3, 4] for n = 5
+    input: n (int) - number of unique elements
     input : numConstraints (int) - the number of constraints to form from n
     ouput : a list of list of constraints [first, second, third] : where third is not between first and second. first,second can be duplicated pairs in the constraints
     """
@@ -45,9 +43,9 @@ def constraintGenDupes(n, numConstraints):
     rand = Random()
 
     while(len(constraints) < numConstraints):
-        first = rand.randrange(len(n))
-        second = rand.randrange(len(n))
-        third = rand.randrange(len(n))
+        first = rand.randrange(n)
+        second = rand.randrange(n)
+        third = rand.randrange(n)
 
         if(first <= third and second <= third or first >= third and second >= third):
             constr = [first, second, third]
@@ -60,9 +58,48 @@ def constraintGenDupes(n, numConstraints):
         s.add(c[0])
         s.add(c[1])
         s.add(c[2])
-    if(len(s) != len(n)):
-        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), len(n)))
+    if(len(s) != n):
+        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), n))
         constraints = constraintGenDupes(n, numConstraints)
+
+    return constraints
+
+def constraintGenStrictlyNoDupes(n, numConstraints):
+    """
+    input: n (int): number of unique elements
+    input : numConstraints (int) - the number of constraints to form from n
+    ouput : a map of constraints of (first, second) : third where third is not
+            between first and second. No duplicated values for any constraint first != second != third
+    """
+    constraints = dict()
+    rand = Random()
+
+    while(len(constraints) < numConstraints):
+        first = rand.randrange(n)
+        second = rand.randrange(n)
+        first, second = (second, first) if first > second else (first, second)
+        if(first == second):
+            continue
+        r = [x for x in range(first, second)]
+        z = [x for x in range(n)]
+        thirdrange = list(set(z)- set(r))
+        third = thirdrange[rand.randrange(len(thirdrange))]
+
+        if((first < third and second < third or first > third and second > third) and first != second and first != third and second != third):
+            if((second, first) not in constraints):
+                constraints[(first, second)] = third
+
+    #make sure every element in n is used at least once
+    s = set()
+    for c in constraints:
+        s.add(c[0])
+        s.add(c[1])
+        s.add(constraints[c])
+    if(len(s) != n):
+        print("Constraints are not valid! Missing elements from n {0}/{1}".format(len(s), n))
+        constraints = constraintGenNoDupes(n, numConstraints)
+
+    constraints = [[c[0], c[1], constraints[c]] for c in constraints]
 
     return constraints
 
