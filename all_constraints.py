@@ -19,8 +19,10 @@ def generate_all_constraints(lst):
                     constraints.append((lst[j], lst[k], lst[i]))
         for j in range(i + 1, len(lst)):
             for k in range(i + 1, j):
-                constraints.append((lst[k], lst[j], lst[i]))
-                constraints.append((lst[j], lst[k], lst[i]))
+                if rand > 0.5:
+                    constraints.append((lst[k], lst[j], lst[i]))
+                else:
+                    constraints.append((lst[j], lst[k], lst[i]))
     return constraints
 
 def randomly_select_constraints(constraints, n):
