@@ -1,4 +1,5 @@
 import random
+import sys
 
 def generate_all_constraints(lst):
     """
@@ -19,6 +20,7 @@ def generate_all_constraints(lst):
                     constraints.append((lst[j], lst[k], lst[i]))
         for j in range(i + 1, len(lst)):
             for k in range(i + 1, j):
+                rand = random.random()
                 if rand > 0.5:
                     constraints.append((lst[k], lst[j], lst[i]))
                 else:
@@ -32,12 +34,12 @@ def randomly_select_constraints(constraints, n):
     :param n: number of constraints selected
     :return: n-sized list of randomly picked elements from `constraints`
     """
-    c = list(constraints)
+    constraints_copy = list(constraints)
     selected = []
-    for _ in range(n):
-        index = random.randint(0, len(c))
-        elem = c.pop(index) # Do not add the same constraints.
-        selected.append(elem)
+    for i in range(n):
+        index = random.randrange(len(constraints_copy))
+        c = constraints_copy.pop(index)
+        selected.append(c)
     return selected
 
 def all_wizards(constraints, n):
@@ -125,3 +127,38 @@ def find_duplicates4(constraints, n):
         elem = c.pop(i)
         duplicates.append((elem[0], elem[0], elem[0]))
     return duplicates
+
+def inject_duplicates(constraints, n, form):
+    for i in range(n):
+        index = random.randint(0, len(constraints))
+        triplet = constraints[index]
+        i, j, k = form
+        constraints[index] = (triplet[i], triplet[j], triplet[k])
+    
+def inject_all_duplicates(constraints):
+    for form in [(0, 0, 2), (0, 2, 2), (0, 2, 0), (0, 0, 0)]:
+        inject_duplicates(constraints, int(len(constraints) * 0.05), form)
+    
+def main():
+    if len(sys.argv) < 3:
+        print('Usage: python all_constraints.py <length of list> <number of constraints>')
+        return
+
+    lst_length = int(sys.argv[1])
+    num_constraints = int(sys.argv[2])
+    
+    all_possibilities = generate_all_constraints(range(lst_length))
+    constraints = randomly_select_constraints(all_possibilities, num_constraints)
+    while (not all_wizards(constraints, lst_length)):
+        constraints = randomly_select_constraints(all_possibilities, num_constraints)
+
+    inject_all_duplicates(constraints)
+
+    for c in constraints:
+        print(c)
+    print(len(constraints))
+
+main()
+    
+    
+    
