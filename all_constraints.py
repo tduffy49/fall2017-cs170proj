@@ -53,13 +53,6 @@ def all_wizards(constraints, n):
         return False
     return True
 
-def randomly_select_all_wizards(constraints, n):
-    lst = list(constraints)
-    if(not all_wizards(constraints, n)):
-        return randomly_select_constraints(generate_all_constraints(range(1, n+1)), n)
-    return lst
-
-
 def find_duplicates1(constraints, n):
     """
     From randomly picked (a, b, c) create duplicate of type (a, a, c)
@@ -123,3 +116,4 @@ def find_duplicates4(constraints, n):
         elem = c.pop(i)
         duplicates.append((elem[0], elem[0], elem[0]))
     return duplicates
+
