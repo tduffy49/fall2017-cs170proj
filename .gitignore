@@ -3,8 +3,10 @@
 
 # Ignore text editor
 .idea/*
+__pycache__
 
 # Ignore generated input files
 input20.in
 input35.in
 input50.in
+inputs.zip
