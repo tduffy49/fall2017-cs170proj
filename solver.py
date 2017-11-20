@@ -37,7 +37,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
         x_3 = get_variable('%s<%s' % (b, c))
         x_4 = get_variable('%s<%s' % (c, b))
         
-        exp &= (x_1 | x_2) & (x_3 | x_4) & (~x_1 | ~x_4) & (~x_2 | ~x_3)
+        exp &= (x_1 | x_2) & (x_3 | x_4) & (-x_1 | -x_4) & (-x_2 | -x_3)
 
     solver = Minisat()
     solution = solver.solve(exp)
