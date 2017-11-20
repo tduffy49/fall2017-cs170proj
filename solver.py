@@ -1,10 +1,41 @@
 import argparse
+import networkx as nx
 
 """
 ======================================================================
   Complete the following function.
 ======================================================================
 """
+def build_dag(lst):
+    """
+    For string "<name1><<name2>", add and edge from name1 to name2.
+    :param lst: list of edge strings, i.e. "Dumbledore<Harry"
+    :return: a DAG
+    """
+    G = nx.DiGraph()
+    for elem in lst:
+        name1, name2 = elem.split("<")
+        G.add_node(name1) # add_node is set operation. Idempotent for same names.
+        G.add_node(name2)
+        G.add_edge(name1, name2)
+    return G
+
+def find_source(dag):
+    for node in dag.nodes():
+        if dag.in_degree(node) == 0:
+            return node
+
+def linearize(dag):
+    """
+    :param dag: DAG
+    :return: linearized DAG
+    """
+    source = find_source(dag)
+    assert(source)
+
+    postorder = list(nx.dfs_postorder_nodes(dag, source))
+    postorder.reverse()
+    return postorder
 
 def solve(num_wizards, num_constraints, wizards, constraints):
     """
