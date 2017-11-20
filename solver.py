@@ -1,5 +1,6 @@
 import argparse
-
+from satispy import Variable, Cnf
+from satispy.solver import Minisat
 """
 ======================================================================
   Complete the following function.
@@ -19,6 +20,18 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
+    exp = Cnf()
+    for constraint in constraints:
+        a, b, c = constraint
+        x_1 = Variable('%s < %s' % (a, c))
+        x_2 = Variable('%s < %s' % (c, a))
+        x_3 = Variable('%s < %s' % (b, c))
+        x_4 = Variable('%s < %s' % (c, b))
+        
+        exp &= (x_1 | x_2) & (x_3 | x_4) & (~x_1 | ~x_4) & (~x_2 | ~x_3)
+    solver = Minisat()
+    solution = solver.solve(exp)
+
     return []
 
 """
