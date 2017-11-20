@@ -1,0 +1,61 @@
+#!/bin/bash
+
+python3 output_validator.py phase2_inputs/inputs20/input20_0.in phase2_outputs/outputs20/output20_0.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_1.in phase2_outputs/outputs20/output20_1.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_2.in phase2_outputs/outputs20/output20_2.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_3.in phase2_outputs/outputs20/output20_3.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_4.in phase2_outputs/outputs20/output20_4.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_5.in phase2_outputs/outputs20/output20_5.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_6.in phase2_outputs/outputs20/output20_6.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_7.in phase2_outputs/outputs20/output20_7.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_8.in phase2_outputs/outputs20/output20_8.out
+
+python3 output_validator.py phase2_inputs/inputs20/input20_9.in phase2_outputs/outputs20/output20_9.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_0.in phase2_outputs/outputs35/output35_0.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_1.in phase2_outputs/outputs35/output35_1.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_2.in phase2_outputs/outputs35/output35_2.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_3.in phase2_outputs/outputs35/output35_3.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_4.in phase2_outputs/outputs35/output35_4.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_5.in phase2_outputs/outputs35/output35_5.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_6.in phase2_outputs/outputs35/output35_6.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_7.in phase2_outputs/outputs35/output35_7.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_8.in phase2_outputs/outputs35/output35_8.out
+
+python3 output_validator.py phase2_inputs/inputs35/input35_9.in phase2_outputs/outputs35/output35_9.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_0.in phase2_outputs/outputs50/output50_0.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_1.in phase2_outputs/outputs50/output50_1.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_2.in phase2_outputs/outputs50/output50_2.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_3.in phase2_outputs/outputs50/output50_3.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_4.in phase2_outputs/outputs50/output50_4.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_5.in phase2_outputs/outputs50/output50_5.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_6.in phase2_outputs/outputs50/output50_6.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_7.in phase2_outputs/outputs50/output50_7.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_8.in phase2_outputs/outputs50/output50_8.out
+
+python3 output_validator.py phase2_inputs/inputs20/input50_9.in phase2_outputs/outputs50/output50_9.out
