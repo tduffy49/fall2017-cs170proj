@@ -1,6 +1,9 @@
 import argparse
 import networkx as nx
 
+from satispy import Variable, Cnf
+from satispy.solver import Minisat
+
 """
 ======================================================================
   Complete the following function.
@@ -50,6 +53,28 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
+    variables = {}
+    def get_variable(name):
+        if name in variables:
+            var = variables[name]
+        else:
+            var = Variable(name)
+            variables[name] = var
+        return var
+    
+    exp = Cnf()
+    for constraint in constraints:
+        a, b, c = constraint
+        x_1 = get_variable('%s<%s' % (a, c))
+        x_2 = get_variable('%s<%s' % (c, a))
+        x_3 = get_variable('%s<%s' % (b, c))
+        x_4 = get_variable('%s<%s' % (c, b))
+        
+        exp &= (x_1 | x_2) & (x_3 | x_4) & (-x_1 | -x_4) & (-x_2 | -x_3)
+
+    solver = Minisat()
+    solution = solver.solve(exp)
+
     return []
 
 """
