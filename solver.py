@@ -27,6 +27,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
         else:
             var = Variable(name)
             variables[name] = var
+        return var
     
     exp = Cnf()
     for constraint in constraints:
