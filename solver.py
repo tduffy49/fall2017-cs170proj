@@ -1,7 +1,7 @@
 import argparse
 import sys
 sys.path.append('/home/jake/anaconda3/lib/python3.5/site-packages')
-import networkx as nx=
+import networkx as nx
 
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
@@ -11,6 +11,7 @@ from satispy.solver import Minisat
   Complete the following function.
 ======================================================================
 """
+
 def build_dag(lst):
     """
     For string "<name1><<name2>", add and edge from name1 to name2.
@@ -41,6 +42,7 @@ def linearize(dag):
     postorder = list(nx.dfs_postorder_nodes(dag, source))
     postorder.reverse()
     return postorder
+
 
 def solve(num_wizards, num_constraints, wizards, constraints):
     """
@@ -88,7 +90,9 @@ def solve(num_wizards, num_constraints, wizards, constraints):
         return []
 
     g = build_dag(valid)
-    return linearize(g)
+    s = linearize(g)
+    print(s)
+    return s
 
 """
 ======================================================================
