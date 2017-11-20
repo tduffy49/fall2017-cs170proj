@@ -1,6 +1,9 @@
 import argparse
 import src.dag_utils as dag
 
+import sys
+sys.path.append('/home/jake/anaconda3/lib/python3.5/site-packages')
+
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
 
@@ -9,6 +12,7 @@ from satispy.solver import Minisat
   Complete the following function.
 ======================================================================
 """
+
 
 def solve(num_wizards, num_constraints, wizards, constraints):
     """
@@ -35,17 +39,30 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     exp = Cnf()
     for constraint in constraints:
         a, b, c = constraint
-        x_1 = get_variable('%s<%s' % (a, c))
-        x_2 = get_variable('%s<%s' % (c, a))
-        x_3 = get_variable('%s<%s' % (b, c))
-        x_4 = get_variable('%s<%s' % (c, b))
+        x_1 = get_variable('%s < %s' % (a, c))
+        x_2 = get_variable('%s < %s' % (c, a))
+        x_3 = get_variable('%s < %s' % (b, c))
+        x_4 = get_variable('%s < %s' % (c, b))
         
         exp &= (x_1 | x_2) & (x_3 | x_4) & (-x_1 | -x_4) & (-x_2 | -x_3)
 
     solver = Minisat()
     solution = solver.solve(exp)
 
-    return []
+    valid = []
+    if solution.success:
+        for var in variables:
+            key = variables[var]
+            if solution[key]:
+                valid.append(var)
+    else:
+        assert(False) # There cannot be no solution.
+        return []
+
+    g = dag.build_dag(valid)
+    s = dag.linearize(g)
+
+    return s
 
 """
 ======================================================================
