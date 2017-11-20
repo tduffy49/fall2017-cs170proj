@@ -1,6 +1,11 @@
 import argparse
+
+import sys
+sys.path.append('/home/jake/anaconda3/lib/python3.5/site-packages')
+
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
+
 """
 ======================================================================
   Complete the following function.
@@ -42,6 +47,13 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     solver = Minisat()
     solution = solver.solve(exp)
 
+    if solution.success:
+        print("Solution found")
+        for var in variables:
+            key = variables[var]
+            print(key, solution[key])
+    else:
+        print('No solution')
     return []
 
 """
