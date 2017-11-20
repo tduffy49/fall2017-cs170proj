@@ -77,14 +77,18 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     solver = Minisat()
     solution = solver.solve(exp)
 
+    valid = []
     if solution.success:
-        print("Solution found")
         for var in variables:
             key = variables[var]
-            print(key, solution[key])
+            if solution[key]:
+                valid.append(var)
     else:
         print('No solution')
-    return []
+        return []
+
+    g = build_dag(valid)
+    return linearize(g)
 
 """
 ======================================================================
