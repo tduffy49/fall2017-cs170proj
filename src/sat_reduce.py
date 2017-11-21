@@ -1,4 +1,85 @@
 from satispy import Variable, Cnf
+import pycosat as ps
+
+# ====================
+# PycoSat Reduction
+# ====================
+
+class LiteralTranslator(object):
+    """
+    A helper class for integration with PycoSat, allows for two-way translation
+    between string literal and its index representation. Example:
+
+    lt = LiteralTranslator()
+    key = lt.add_literal("Harry < Hermione")
+    lt.get_literal(key)             # "Harry < Hermione"
+    lt.get_key("Harry < Hermione")  # `key`
+    """
+    def __init__(self):
+        self.counter = 1
+        self.literal_to_key = {}
+        self.key_to_literal = {}
+
+    def __add_literal(self, literal):
+        assert(literal not in self.literal_to_key)
+
+        self.literal_to_key[literal] = self.counter
+        self.key_to_literal[self.counter] = literal
+        self.counter += 1
+        return self.key_to_literal[literal]
+
+    def __add_literals(self, literals):
+        for literal in literals:
+            self.__add_literal(literal)
+
+    def touch_literal(self, literal):
+        """
+        Add literal if it does not exist, then return its original or newly created key.
+        :param literal: literal of form "Snape < Dumbledore"
+        :return: a positive integer signifying its index
+        """
+        if literal in self.literal_to_key:
+            return self.literal_to_key[literal]
+
+        return self.__add_literal(literal)
+
+    def translate(self, key):
+        """
+        :param key: index of string literal
+        :return: string literal corresponding to `key`
+        """
+        if key not in self.key_to_literal:
+            return LookupError
+        return self.key_to_literal[key]
+
+def reduce_pycosat(constraints):
+    L = LiteralTranslator()
+    cnf = []
+    for constraint in constraints:
+        a, b, c = constraint
+        x1 = L.touch_literal('%s < %s' % (a, c))
+        x2 = L.touch_literal('%s < %s' % (c, a))
+        x3 = L.touch_literal('%s < %s' % (b, c))
+        x4 = L.touch_literal('%s < %s' % (c, b))
+        cnf.append([x1, x2])
+        cnf.append([x3, x4])
+        cnf.append([-x1, -x4])
+        cnf.append([-x2, -x3])
+
+    return cnf
+
+def solve_pycosat(cnf):
+    return ps.solve(cnf)
+
+def translate_pycosat(solution, lt):
+    literals = []
+    for key in solution:
+        if key > 0:
+            literals.append(lt.translate(key))
+
+# ====================
+# Satispy Reduction
+# ====================
 
 def touch_variable(name, map):
     """
@@ -14,7 +95,7 @@ def touch_variable(name, map):
         map[name] = var
     return var
 
-def reduce(constraints):
+def reduce_satispy(constraints):
     """
     Reduce constraints from wizards problem into CNF form for our SAT instance.
     :param constraints: inputs from wizard problem

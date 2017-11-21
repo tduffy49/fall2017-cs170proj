@@ -38,7 +38,7 @@ class TestSatMethods(unittest.TestCase):
     def test_sat_basic(self):
         """Tests the case when Dumbledore is not between Harry and Hermione and Harry is not between
         Dumbledore and Hermione. So Dumbledore > Hermione > Harry."""
-        cnf = sat.reduce([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")])
+        cnf = sat.reduce_satispy([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")])
         solver = Minisat()
         solution = solver.solve(cnf)
 
