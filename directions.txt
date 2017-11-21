@@ -1,2 +1,6 @@
 To output all input files, run:
-    `python input_generator.py`
+    python input_generator.py
+
+To run all our test cases, do:
+    chmod 755 test.sh
+    ./test.sh
