@@ -23,7 +23,12 @@ class TestDagMethods(unittest.TestCase):
         self.assertTrue(valid)
 
     def test_linearize_multiple_sink(self):
-        G = dg.build_dag([])
+        G = dg.build_dag(["Harry < Dumbledore", "Harry < Snape", "Hermione < Harry"])
+        result = dg.linearize(G)
+        valid = (result == ["Hermione", "Harry", "Snape", "Dumbledore"]) | \
+                (result == ["Hermione", "Harry", "Dumbledore", "Snape"])
+        self.assertTrue(valid)
+
 
 if __name__ == '__main__':
     unittest.main()
