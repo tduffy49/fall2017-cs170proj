@@ -11,9 +11,9 @@ class LiteralTranslator(object):
     between string literal and its index representation. Example:
 
     lt = LiteralTranslator()
-    key = lt.add_literal("Harry < Hermione")
-    lt.get_literal(key)             # "Harry < Hermione"
-    lt.get_key("Harry < Hermione")  # `key`
+    key = lt.touch_literal("Harry < Hermione")
+    lt.translate(key)                       # "Harry < Hermione"
+    lt.touch_literal("Harry < Hermione")    # `key`
     """
     def __init__(self):
         self.counter = 1
@@ -26,7 +26,7 @@ class LiteralTranslator(object):
         self.literal_to_key[literal] = self.counter
         self.key_to_literal[self.counter] = literal
         self.counter += 1
-        return self.key_to_literal[literal]
+        return self.literal_to_key[literal]
 
     def __add_literals(self, literals):
         for literal in literals:
@@ -52,15 +52,19 @@ class LiteralTranslator(object):
             return LookupError
         return self.key_to_literal[key]
 
-def reduce_pycosat(constraints):
-    L = LiteralTranslator()
+def reduce_pycosat(constraints, lt):
+    """
+    :param constraints:
+    :param lt: a LiteralTranslator object
+    :return: normal form in Pycosat spec
+    """
     cnf = []
     for constraint in constraints:
         a, b, c = constraint
-        x1 = L.touch_literal('%s < %s' % (a, c))
-        x2 = L.touch_literal('%s < %s' % (c, a))
-        x3 = L.touch_literal('%s < %s' % (b, c))
-        x4 = L.touch_literal('%s < %s' % (c, b))
+        x1 = lt.touch_literal('%s < %s' % (a, c))
+        x2 = lt.touch_literal('%s < %s' % (c, a))
+        x3 = lt.touch_literal('%s < %s' % (b, c))
+        x4 = lt.touch_literal('%s < %s' % (c, b))
         cnf.append([x1, x2])
         cnf.append([x3, x4])
         cnf.append([-x1, -x4])
@@ -72,10 +76,18 @@ def solve_pycosat(cnf):
     return ps.solve(cnf)
 
 def translate_pycosat(solution, lt):
+    """
+    Returns a list of string literals, i.e. ["Harry < Hermione", "Hermione < Dumbledore"]
+    :param solution: solution in Pycosat spec
+    :param lt: same LiteralTranslator object used for reduction
+    :return: list of string literals inequalities
+    """
     literals = []
     for key in solution:
         if key > 0:
             literals.append(lt.translate(key))
+
+    return literals
 
 # ====================
 # Satispy Reduction

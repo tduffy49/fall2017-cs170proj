@@ -5,17 +5,35 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 import src.sat_reduce as sat
+import src.dag_utils as dag
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
 
-class TestSatMethods(unittest.TestCase):
+class TestSatispyReduction(unittest.TestCase):
+    def test_reduce_pycosat(self):
+        L = sat.LiteralTranslator()
+        cnf = sat.reduce_pycosat([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")], L)
+        solution = sat.solve_pycosat(cnf)
+        literals = sat.translate_pycosat(solution, L)
+        G = dag.build_dag(literals)
+        wizard_ordering = dag.linearize(G)
 
+        valid = (wizard_ordering == ["Harry", "Hermione", "Dumbledore"]) | \
+                (wizard_ordering == ["Dumbledore", "Harry", "Hermione"])
+        self.assertTrue(valid)
+
+class TestSatispyReduction(unittest.TestCase):
+    def setUp(self):
+        self.skipTest('deprecated') # Skips whole test module.
+
+    @unittest.skip('deprecated')
     def test_touch_variable(self):
         mapping = {}
         sat.touch_variable('a', mapping)
         self.assertTrue(type(mapping['a']) == Variable)
         self.assertTrue(mapping['a'].name == 'a') # Variable has same name as its string mapping.
 
+    @unittest.skip('deprecated')
     def test_sat_lib(self):
         """Sanity check: (x1 v -x2), (-x2), (-x1), (x3 v x1 x x2)"""
         cnf = Cnf()
@@ -35,6 +53,7 @@ class TestSatMethods(unittest.TestCase):
         for lit in false_literals:
             self.assertFalse(solution[lit])
 
+    @unittest.skip('deprecated')
     def test_sat_basic(self):
         """Tests the case when Dumbledore is not between Harry and Hermione and Harry is not between
         Dumbledore and Hermione. So Dumbledore > Hermione > Harry."""
