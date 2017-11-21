@@ -9,8 +9,28 @@ import src.dag_utils as dag
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
 
-class TestSatispyReduction(unittest.TestCase):
+def check(constraints, solution):
+    """
+    :param constraints: instance of WizardOrdering
+    :param solution: supposed solution
+    :return: True if `solution` is valid
+    """
+    for constraint in constraints:
+        a, b, c = constraint
+        ci = solution.index(c)
+        bi = solution.index(b)
+        ai = solution.index(a)
+        v1 = (ci < ai and ci < bi)
+        v2 = (ci > ai and ci > bi)
+        if not (v1 or v2):
+            return False
+
+    return True
+
+class TestPycosatReduction(unittest.TestCase):
     def test_reduce_pycosat(self):
+        constraints = [("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")]
+
         L = sat.LiteralTranslator()
         cnf = sat.reduce_pycosat([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")], L)
         solution = sat.solve_pycosat(cnf)
@@ -18,9 +38,7 @@ class TestSatispyReduction(unittest.TestCase):
         G = dag.build_dag(literals)
         wizard_ordering = dag.linearize(G)
 
-        valid = (wizard_ordering == ["Harry", "Hermione", "Dumbledore"]) | \
-                (wizard_ordering == ["Dumbledore", "Harry", "Hermione"])
-        self.assertTrue(valid)
+        self.assertTrue(check(constraints, wizard_ordering))
 
 class TestSatispyReduction(unittest.TestCase):
     def setUp(self):
