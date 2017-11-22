@@ -43,6 +43,11 @@ class LiteralTranslator(object):
 
         return self.__add_literal(literal)
 
+    def find_literal(self, literal):
+        if literal in self.literal_to_key:
+            return self.literal_to_key[literal]
+        return None
+
     def translate(self, key):
         """
         :param key: index of string literal
@@ -51,6 +56,65 @@ class LiteralTranslator(object):
         if key not in self.key_to_literal:
             return LookupError
         return self.key_to_literal[key]
+
+    def literals(self):
+        return self.literal_to_key.keys()
+
+class LiteralTransitivityManager(object):
+    """
+    Helper class to enforce dependencies based on constraints.
+    Keeps a list of wizards and literal dependencies. Needs a LiteralTranslator object.
+
+    Ltm = LiteralTransitivityManager(L)
+    transitivity_constraints = Ltm.enforce()
+    cnf.extend(transitivity_constraints)
+    """
+    def __init__(self, lt):
+        self.lt = lt
+        self.dependencies = {}
+        self.clauses = []           # Transitivity clauses to be added.
+
+    def __scan(self):
+        for lit in self.lt.literals():
+            young_wiz, old_wiz = lit.split(' < ')
+            if old_wiz not in self.dependencies:
+                self.dependencies[old_wiz] = set()
+            self.dependencies[old_wiz].add(young_wiz)
+
+    def __enforce_dependencies(self, literal):
+        """
+        If z < x and y < z, then y < x for all y.
+        :param literal: string in form 'z < x'
+        :return: cnf clauses to enforce transitivity on literal
+        """
+        z, x = literal.split(' < ')
+        for y in self.dependencies[z]:
+            z_x = self.lt.touch_literal('%s < %s' % (z , x))
+            y_z = self.lt.touch_literal('%s < %s' % (y , z))
+            y_x = self.lt.touch_literal('%s < %s' % (y , x))
+            constraint = [-z_x, -y_z, y_x]
+            # TODO: Add dependency update
+            if constraint not in self.clauses:
+                self.clauses.append(constraint) # If z_x and y_z, then y_x
+
+    def enforce(self):
+        """
+        The dependency chain assures that transitivity constraints
+        are satisfied.
+        :return: cnf clauses to enforce transitivity for all literals
+        """
+        self.__scan()
+        size = -1
+        while not len(self.clauses) == size:
+            size = len(self.clauses)
+            for literal in self.lt.literals():
+                self.__enforce_dependencies(literal)
+
+        return NotImplementedError # Class not tested and proved.
+
+class LiteralConsistencyManager(object):
+    def __init__self(self, lt):
+        return NotImplementedError
 
 def reduce_pycosat(constraints, lt):
     """
