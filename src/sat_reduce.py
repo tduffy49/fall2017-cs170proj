@@ -111,14 +111,10 @@ class LiteralTransitivityManager(object):
         :return: cnf clauses to enforce transitivity for all literals
         """
         self.__scan()
-        size = -1
 
-        # Since __enforce_dependencies(lit) may alter the literal translator,
-        # we update until its size no longer changes.
-        while not len(self.clauses) == size:
-            size = len(self.clauses)
-            for literal in self.lt.literals():
-                self.__enforce_dependencies(literal)
+        # Only need a linear scan of enforce for some reason. Prove this.
+        for literal in self.lt.literals():
+            self.__enforce_dependencies(literal)
 
         return self.clauses
 

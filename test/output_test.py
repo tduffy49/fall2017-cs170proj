@@ -20,7 +20,6 @@ def test_passed_input(files, dir):
             out_dir = dir.replace('input', 'output')
             out_file = file.replace('.in', '.out')
             write_output(os.path.join(out_dir, out_file), solution)
-            print (out_file + ' written.')
 
         return check(constraints, solution)
 
