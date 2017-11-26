@@ -14,7 +14,6 @@ class OutputTest(unittest.TestCase):
     def setUp(self):
         return
 
-    @unittest.skip('Temporarily suspended. Solution in the works')
     def test_inputs20(self):
         files = os.listdir(self.DIR_INPUTS_20)
         files = sorted(files, key=str.lower)
@@ -22,6 +21,7 @@ class OutputTest(unittest.TestCase):
             num_wizards, num_constraints, wizards, constraints = read_input(os.path.join(self.DIR_INPUTS_20, file))
             solution = solve(num_wizards, num_constraints, wizards, constraints)
             self.assertTrue(check(constraints, solution))
+            print ('\n' + file + ' passed.')
 
 if __name__ == '__main__':
     unittest.main()

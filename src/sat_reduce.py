@@ -76,10 +76,16 @@ class LiteralTransitivityManager(object):
 
     def __scan(self):
         for lit in self.lt.literals():
-            young_wiz, old_wiz = lit.split(' < ')
-            if old_wiz not in self.dependencies:
-                self.dependencies[old_wiz] = set()
-            self.dependencies[old_wiz].add(young_wiz)
+            x, y = lit.split(' < ')
+            self.__add_dependency(x, y)
+
+    def __add_dependency(self, x, y):
+        """
+        If x < y, add x as a dependency of y.
+        """
+        if y not in self.dependencies:
+            self.dependencies[y] = set()
+        self.dependencies[y].add(x)
 
     def __enforce_dependencies(self, literal):
         """
@@ -93,11 +99,12 @@ class LiteralTransitivityManager(object):
             y_z = self.lt.touch_literal('%s < %s' % (y , z))
             y_x = self.lt.touch_literal('%s < %s' % (y , x))
             constraint = [-z_x, -y_z, y_x]
-            # TODO: Add dependency update
-            if constraint not in self.clauses:
-                self.clauses.append(constraint) # If z_x and y_z, then y_x
 
-    def enforce(self):
+            self.__add_dependency(y, x)
+            if constraint not in self.clauses:
+                self.clauses.append(constraint)
+
+    def constraints(self):
         """
         The dependency chain assures that transitivity constraints
         are satisfied.
@@ -105,16 +112,35 @@ class LiteralTransitivityManager(object):
         """
         self.__scan()
         size = -1
+
+        # Since __enforce_dependencies(lit) may alter the literal translator,
+        # we update until its size no longer changes.
         while not len(self.clauses) == size:
             size = len(self.clauses)
             for literal in self.lt.literals():
                 self.__enforce_dependencies(literal)
 
-        return NotImplementedError # Class not tested and proved.
+        return self.clauses
 
 class LiteralConsistencyManager(object):
-    def __init__self(self, lt):
-        return NotImplementedError
+    def __init__(self, lt):
+        self.lt = lt
+
+    def constraints(self):
+        clauses = []
+        for lit in self.lt.literals():
+            z, x = lit.split(' < ')
+            negation = x + ' < ' + z
+            n = self.lt.find_literal(negation)
+            if not n:
+                continue
+
+            m = self.lt.find_literal(lit)
+            # Both cannot be true.
+            constraint = [-n, -m]
+            clauses.append(constraint)
+
+        return clauses
 
 def reduce_pycosat(constraints, lt):
     """
@@ -133,6 +159,14 @@ def reduce_pycosat(constraints, lt):
         cnf.append([x3, x4])
         cnf.append([-x1, -x4])
         cnf.append([-x2, -x3])
+
+    T = LiteralTransitivityManager(lt)
+    t_constraints = T.constraints()
+    cnf.extend(t_constraints)
+
+    C = LiteralConsistencyManager(lt)
+    c_constraints = C.constraints()
+    cnf.extend(c_constraints)
 
     return cnf
 
