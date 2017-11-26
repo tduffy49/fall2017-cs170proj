@@ -122,6 +122,7 @@ class LiteralTransitivityManager(object):
 
         return self.clauses
 
+
 class LiteralConsistencyManager(object):
     def __init__(self, lt):
         self.lt = lt
@@ -141,6 +142,7 @@ class LiteralConsistencyManager(object):
             clauses.append(constraint)
 
         return clauses
+
 
 def reduce_pycosat(constraints, lt):
     """
@@ -170,8 +172,10 @@ def reduce_pycosat(constraints, lt):
 
     return cnf
 
+
 def solve_pycosat(cnf):
     return ps.solve(cnf)
+
 
 def translate_pycosat(solution, lt):
     """
@@ -191,6 +195,7 @@ def translate_pycosat(solution, lt):
 # Satispy Reduction
 # ====================
 
+
 def touch_variable(name, map):
     """
     Find variable map[name] if it exists else create one and map it.
@@ -204,6 +209,7 @@ def touch_variable(name, map):
         var = Variable(name)
         map[name] = var
     return var
+
 
 def reduce_satispy(constraints):
     """

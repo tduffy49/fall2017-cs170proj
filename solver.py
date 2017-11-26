@@ -1,8 +1,6 @@
 import argparse
 import src.dag_utils as dg
 import src.sat_reduce as sr
-import sys
-sys.path.append('/home/jake/anaconda3/lib/python3.5/site-packages')
 import pycosat
 import itertools
 
@@ -14,6 +12,7 @@ from satispy.solver import Minisat
   Complete the following function.
 ======================================================================
 """
+
 
 def remove_bad_constraints(constraints):
     good_constraints = list()
@@ -28,6 +27,7 @@ def remove_bad_constraints(constraints):
             continue
         good_constraints.append(c)
     return good_constraints
+
 
 def num_constraints_satisfied(num_wizards, constraints, ordering):
     if (len(ordering) != num_wizards):
@@ -51,6 +51,7 @@ def num_constraints_satisfied(num_wizards, constraints, ordering):
             constraints_satisfied += 1
 
     return constraints_satisfied
+
 
 def original_solver(constraints):
     variables = {}
@@ -86,6 +87,7 @@ def original_solver(constraints):
         return []
 
     return valid
+
 
 def pycosatSolve(constraints, limit):
     cnf = list()
@@ -133,6 +135,7 @@ def pycosatSolve(constraints, limit):
     
     return solutions
 
+
 def solve(num_wizards, num_constraints, wizards, constraints):
     """
     Write your algorithm here.
@@ -146,32 +149,14 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
-    # unique_constraints = remove_bad_constraints(constraints)
-
-    # TODO: Rethink SAT Reduction
-    # solutions = pycosatSolve(constraints, 30000)
-    # best_amt_of_constraints = 0
-    # best_solution = list()
-    # for sol in solutions:
-    #     g = dg.build_dag(sol)
-    #     s = dg.linearize(g)
-    #     satisfied_constraints = num_constraints_satisfied(num_wizards, constraints, s)
-    #     if satisfied_constraints > best_amt_of_constraints:
-    #         best_solution = s
-    #         best_amt_of_constraints = satisfied_constraints
-    #     if(satisfied_constraints == num_constraints):
-    #         break
-
     L = sr.LiteralTranslator()
     cnf = sr.reduce_pycosat(constraints, L)
     solution = sr.solve_pycosat(cnf)
     literals = sr.translate_pycosat(solution, L)
 
-    G = dg.build_dag(literals)
+    G = dg.build_graph(literals)
     return dg.linearize(G)
 
-    print("Satisfied {0}/{1} constraints".format(best_amt_of_constraints, num_constraints))
-    return best_solution
 
 """
 ======================================================================
@@ -194,10 +179,12 @@ def read_input(filename):
     wizards = list(wizards)
     return num_wizards, num_constraints, wizards, constraints
 
+
 def write_output(filename, solution):
     with open(filename, "w") as f:
         for wizard in solution:
             f.write("{0} ".format(wizard))
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description = "Constraint Solver.")

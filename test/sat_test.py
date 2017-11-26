@@ -35,7 +35,7 @@ class TestPycosatReduction(unittest.TestCase):
         cnf = sat.reduce_pycosat([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")], L)
         solution = sat.solve_pycosat(cnf)
         literals = sat.translate_pycosat(solution, L)
-        G = dag.build_dag(literals)
+        G = dag.build_graph(literals)
         wizard_ordering = dag.linearize(G)
 
         self.assertTrue(check(constraints, wizard_ordering))

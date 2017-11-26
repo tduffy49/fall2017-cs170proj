@@ -1,6 +1,7 @@
 import random
 import string
 
+
 def name_gen(constraints, n):
     """
     input: constraints - list of lists of [first, second, third] (all ints)
@@ -25,6 +26,7 @@ def name_gen(constraints, n):
         newNames.append([names[c[0]], names[c[1]], names[c[2]]])
 
     return names, newNames
+
 
 def output_to_file(ordering, constraints, filename):
     """

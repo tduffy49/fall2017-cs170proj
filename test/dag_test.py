@@ -9,13 +9,13 @@ import src.dag_utils as dg
 class TestDagMethods(unittest.TestCase):
 
     def test_linearize_basic(self):
-        G = dg.build_dag(["Hermione < Dumbledore", "Harry < Dumbledore", "Hermione < Snape",
+        G = dg.build_graph(["Hermione < Dumbledore", "Harry < Dumbledore", "Hermione < Snape",
                           "Hermione < Harry", "Snape < Dumbledore"])
         result = dg.linearize(G)
         self.assertEqual(result, ["Hermione", "Harry", "Snape", "Dumbledore"])
 
     def test_linearize_multiple_source(self):
-        G = dg.build_dag(["Hermione < Dumbledore", "Snape < Dumbledore", "Harry < Snape"])
+        G = dg.build_graph(["Hermione < Dumbledore", "Snape < Dumbledore", "Harry < Snape"])
         result = dg.linearize(G)
         valid = (result == ["Hermione", "Harry", "Snape", "Dumbledore"]) | \
                 (result == ["Harry", "Snape", "Hermione", "Dumbledore"]) | \
@@ -23,7 +23,7 @@ class TestDagMethods(unittest.TestCase):
         self.assertTrue(valid)
 
     def test_linearize_multiple_sink(self):
-        G = dg.build_dag(["Harry < Dumbledore", "Harry < Snape", "Hermione < Harry"])
+        G = dg.build_graph(["Harry < Dumbledore", "Harry < Snape", "Hermione < Harry"])
         result = dg.linearize(G)
         valid = (result == ["Hermione", "Harry", "Snape", "Dumbledore"]) | \
                 (result == ["Hermione", "Harry", "Dumbledore", "Snape"])
