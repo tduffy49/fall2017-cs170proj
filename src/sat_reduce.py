@@ -130,8 +130,8 @@ class LiteralTransitivityManager(object):
             constraint = [-z_x, -y_z, y_x]
 
             self.__add_dependency(y, x)
-            if constraint not in self.clauses:
-                self.clauses.append(constraint)
+            self.clauses.append(constraint)
+
 
     def constraints(self, num_iter=None):
         """
@@ -229,34 +229,12 @@ def translate_pycosat(solution, lt):
         if key > 0:
             literals.append(lt.translate(key))
 
-    G = dg.build_graph(literals)
-    return dg.linearize(G)
+    return literals
+
 
 # ========================
 # Pycosat Randomized
 # ========================
-
-def translate_pycosat_randomize(solution, lt):
-    """
-    For when graph may not be a DAG.
-    :param solution: assignment of literals
-    :param lt: literal translator object
-    :return: list of wizards
-    """
-    literals = []
-    for key in solution:
-        if key > 0:
-            literals.append(lt.translate(key))
-
-    # Graph may not be a DAG here.
-    G = dg.build_graph(literals)
-    if nx.is_directed_acyclic_graph(G):
-        return dg.linearize(G)
-
-    tree_type = random.choice([nx.bfs_tree, nx.dfs_tree])
-    dag = tree_type(G, random.choice(list(G.nodes())))
-    return dg.linearize(dag)
-
 
 # How many transitivity scans we do in the next iteration if current one fails.
 TRANSITIVITY_KICK_FACTOR = 1.5
@@ -273,11 +251,21 @@ def solve_pycosat_randomize(constraints):
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
         c_constraints = C.constraints()
-
-        assignments = run_pycosat(cnf + t_constraints + c_constraints)
-        solution = translate_pycosat_randomize(assignments, lt)
+        # print 'Reduced'
+        sat = run_pycosat(cnf + t_constraints + c_constraints)
+        # print 'SAT solved'
+        assignments = translate_pycosat(sat, lt)
+        G = dg.build_graph(assignments)
+        if nx.is_directed_acyclic_graph(G):
+            solution = dg.linearize(G)
+        else:
+            tree_type = random.choice([nx.dfs_tree, nx.bfs_tree])
+            dag = tree_type(G, random.choice(list(G.nodes())))
+            solution = dg.linearize(dag)
+        # print 'DAG built'
 
         num_scans = int(min(TRANSITIVITY_SCAN_CAP, math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR)))
+
     return solution
 
 # ====================
