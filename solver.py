@@ -26,7 +26,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
-    return sr.solve_pycosat(constraints)
+    return sr.solve_pycosat_randomize(constraints)
 
 
 

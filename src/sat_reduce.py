@@ -1,31 +1,10 @@
 from satispy import Variable, Cnf
+import utils
 import dag_utils as dg
 import pycosat as ps
 import networkx as nx
 import random
 import math
-
-
-def check(constraints, solution):
-    """
-    :param constraints: instance of WizardOrdering
-    :param solution: supposed solution
-    :return: True if `solution` is valid
-    """
-    if not solution:
-        return False
-
-    for constraint in constraints:
-        a, b, c = constraint
-        ci = solution.index(c)
-        bi = solution.index(b)
-        ai = solution.index(a)
-        v1 = (ci < ai and ci < bi)
-        v2 = (ci > ai and ci > bi)
-        if not (v1 or v2):
-            return False
-
-    return True
 
 
 # ====================
@@ -132,22 +111,24 @@ class LiteralTransitivityManager(object):
             self.__add_dependency(y, x)
             self.clauses.add(constraint)
 
-
-    def constraints(self, num_iter=None):
+    def constraints(self, num_iter=None, restart=False):
         """
         The dependency chain assures that transitivity constraints
         are satisfied.
         :return: cnf clauses to enforce transitivity for all literals
         """
+        if restart:
+            self.clauses.clear()
+
         size = -1
         if num_iter:
-            for _ in range(num_iter):
-                for literal in self.lt.literals():
-                    self.__enforce_dependencies(literal)
-                    # Terminate if size does not change, .i.e. no updates
-                    if size == len(self.clauses):
-                        return self.clauses
-                    size = len(self.clauses)
+            for literal in self.lt.literals():
+                self.__enforce_dependencies(literal)
+                # Terminate if size does not change, .i.e. no updates
+                if size == len(self.clauses):
+                    return self.clauses
+
+                size = len(self.clauses)
 
             return self.clauses
 
@@ -179,6 +160,7 @@ class LiteralConsistencyManager(object):
 
         return clauses
 
+
 def __scan_clauses_pycosat(constraints, lt):
     cnf = []
     for constraint in constraints:
@@ -193,6 +175,7 @@ def __scan_clauses_pycosat(constraints, lt):
         cnf.append([-x2, -x3])
 
     return cnf
+
 
 def reduce_pycosat(constraints, lt):
     """
@@ -231,6 +214,7 @@ def translate_pycosat(solution, lt):
 
     return literals
 
+
 def solve_pycosat(constraints):
     lt = LiteralTranslator()
     cnf = reduce_pycosat(constraints, lt)
@@ -246,8 +230,9 @@ def solve_pycosat(constraints):
 # ========================
 
 # How many transitivity scans we do in the next iteration if current one fails.
-TRANSITIVITY_KICK_FACTOR = 2
-TRANSITIVITY_SCAN_CAP = 20
+TRANSITIVITY_KICK_FACTOR = 1.5
+TRANSITIVITY_SCAN_CAP = 100000
+
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
@@ -255,15 +240,15 @@ def solve_pycosat_randomize(constraints):
 
     num_scans = 2
     solution = []
-    while not check(constraints, solution):
+    while not utils.check(constraints, solution):
         T = LiteralTransitivityManager(lt)
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
         c_constraints = C.constraints()
         sat_clauses = cnf + list(t_constraints) + c_constraints
-        print 'Reduced'
+
         sat = run_pycosat(sat_clauses)
-        print 'SAT solved'
+
         assignments = translate_pycosat(sat, lt)
         G = dg.build_graph(assignments)
         if nx.is_directed_acyclic_graph(G):
@@ -274,7 +259,6 @@ def solve_pycosat_randomize(constraints):
             # TODO: Bug found. Fix later.
             # Seems like this is not a DFS in Algorithms but an explore() operation that may not reach all nodes.
             solution = None
-        print 'DAG built'
 
         num_scans = int(min(TRANSITIVITY_SCAN_CAP, int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))))
 

@@ -2,6 +2,37 @@ import random
 import string
 
 
+def check(constraints, solution):
+    """
+    :param constraints: instance of WizardOrdering
+    :param solution: supposed solution
+    :return: True if `solution` is valid
+    """
+    return len(constraints) == num_constraints_satisfied(constraints, solution)
+
+
+def num_constraints_satisfied(constraints, solution):
+    """
+    Returns number of constraints satisfied of proposed solution
+    :param constraints: [ (w1 w2 w3) ] where w3 not between w1 and w2
+    :param solution: ordering of wizards
+    :return: number of constraints `solution` satisfied
+    """
+    if not solution:
+        return 0
+
+    result = 0
+    for constraint in constraints:
+        w1, w2, w3 = constraint
+        w1i = solution.index(w1)
+        w2i = solution.index(w2)
+        w3i = solution.index(w3)
+        if (w3i > w2i and w3i > w1i) or (w3i < w2i and w3i < w1i):
+            result += 1
+
+    return result
+
+
 def name_gen(constraints, n):
     """
     input: constraints - list of lists of [first, second, third] (all ints)
