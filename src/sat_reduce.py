@@ -12,7 +12,7 @@ def check(constraints, solution):
     :param solution: supposed solution
     :return: True if `solution` is valid
     """
-    if len(solution) == 0:
+    if not solution:
         return False
 
     for constraint in constraints:
@@ -222,7 +222,7 @@ def translate_pycosat(solution, lt):
     Returns a list of string literals, i.e. ["Harry < Hermione", "Hermione < Dumbledore"]
     :param solution: solution in Pycosat spec
     :param lt: same LiteralTranslator object used for reduction
-    :return: list of wizards
+    :return: literals that are true
     """
     literals = []
     for key in solution:
@@ -231,28 +231,38 @@ def translate_pycosat(solution, lt):
 
     return literals
 
+def solve_pycosat(constraints):
+    lt = LiteralTranslator()
+    cnf = reduce_pycosat(constraints, lt)
+    sat = run_pycosat(cnf)
+    assignments = translate_pycosat(sat, lt)
+
+    # Deterministic reduction. Solution must be a DAG or cannot exist.
+    dag = dg.build_graph(assignments)
+    return dg.linearize(dag)
 
 # ========================
 # Pycosat Randomized
 # ========================
 
 # How many transitivity scans we do in the next iteration if current one fails.
-TRANSITIVITY_KICK_FACTOR = 1.5
+TRANSITIVITY_KICK_FACTOR = 2
 TRANSITIVITY_SCAN_CAP = 20
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
     cnf = __scan_clauses_pycosat(constraints, lt)
 
-    num_scans = 1
+    num_scans = 2
     solution = []
     while not check(constraints, solution):
         T = LiteralTransitivityManager(lt)
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
         c_constraints = C.constraints()
+        sat_clauses = cnf + list(t_constraints) + c_constraints
         print 'Reduced'
-        sat = run_pycosat(cnf + list(t_constraints) + c_constraints)
+        sat = run_pycosat(sat_clauses)
         print 'SAT solved'
         assignments = translate_pycosat(sat, lt)
         G = dg.build_graph(assignments)
@@ -261,10 +271,12 @@ def solve_pycosat_randomize(constraints):
         else:
             tree_type = random.choice([nx.dfs_tree, nx.bfs_tree])
             dag = tree_type(G, random.choice(list(G.nodes())))
-            solution = [] # Fix later
+            # TODO: Bug found. Fix later.
+            # Seems like this is not a DFS in Algorithms but an explore() operation that may not reach all nodes.
+            solution = None
         print 'DAG built'
 
-        num_scans = int(min(TRANSITIVITY_SCAN_CAP, math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR)))
+        num_scans = int(min(TRANSITIVITY_SCAN_CAP, int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))))
 
     return solution
 
