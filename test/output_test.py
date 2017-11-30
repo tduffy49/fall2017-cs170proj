@@ -48,5 +48,8 @@ class OutputTest(unittest.TestCase):
             self.assertTrue(test_passed_input(file, self.DIR_STAFF))
             print (file + ' passed.')
 
+    def test_staff_inputs_precision(self):
+        self.assertTrue(test_passed_input('staff_160.in', self.DIR_STAFF))
+
 if __name__ == '__main__':
     unittest.main()

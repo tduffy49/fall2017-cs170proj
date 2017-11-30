@@ -99,7 +99,7 @@ class LiteralTransitivityManager(object):
     def __init__(self, lt):
         self.lt = lt
         self.dependencies = {}
-        self.clauses = []
+        self.clauses = set()
 
         self.__scan()
 
@@ -127,10 +127,10 @@ class LiteralTransitivityManager(object):
             z_x = self.lt.touch_literal('%s < %s' % (z , x))
             y_z = self.lt.touch_literal('%s < %s' % (y , z))
             y_x = self.lt.touch_literal('%s < %s' % (y , x))
-            constraint = [-z_x, -y_z, y_x]
+            constraint = (-z_x, -y_z, y_x)
 
             self.__add_dependency(y, x)
-            self.clauses.append(constraint)
+            self.clauses.add(constraint)
 
 
     def constraints(self, num_iter=None):
@@ -251,9 +251,9 @@ def solve_pycosat_randomize(constraints):
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
         c_constraints = C.constraints()
-        # print 'Reduced'
-        sat = run_pycosat(cnf + t_constraints + c_constraints)
-        # print 'SAT solved'
+        print 'Reduced'
+        sat = run_pycosat(cnf + list(t_constraints) + c_constraints)
+        print 'SAT solved'
         assignments = translate_pycosat(sat, lt)
         G = dg.build_graph(assignments)
         if nx.is_directed_acyclic_graph(G):
@@ -261,8 +261,8 @@ def solve_pycosat_randomize(constraints):
         else:
             tree_type = random.choice([nx.dfs_tree, nx.bfs_tree])
             dag = tree_type(G, random.choice(list(G.nodes())))
-            solution = dg.linearize(dag)
-        # print 'DAG built'
+            solution = [] # Fix later
+        print 'DAG built'
 
         num_scans = int(min(TRANSITIVITY_SCAN_CAP, math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR)))
 
