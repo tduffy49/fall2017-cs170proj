@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 
+
 def build_graph(lst):
     """
     For string "Name1<Name2", add and edge from name1 to name2.
@@ -28,7 +29,7 @@ def linearize(dag):
     return list(nx.topological_sort(dag))
 
 
-def extract_dag(g):
+def extract_linearize(g):
     """
     Returns all nodes of the graph in a DFS tree
     :param g: graph

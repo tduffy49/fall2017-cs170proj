@@ -65,6 +65,7 @@ class LiteralTranslator(object):
     def literals(self):
         return self.literal_to_key.keys()
 
+
 class LiteralTransitivityManager(object):
     """
     Helper class to enforce dependencies based on constraints.
@@ -228,8 +229,10 @@ def solve_pycosat(constraints):
 # Pycosat Randomized
 # ========================
 
+
 # How many transitivity scans we do in the next iteration if current one fails.
 TRANSITIVITY_KICK_FACTOR = 1.5
+
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
@@ -251,7 +254,7 @@ def solve_pycosat_randomize(constraints):
         if nx.is_directed_acyclic_graph(G):
             solution = gu.linearize(G)
         else:
-            solution = gu.extract_dag(G)
+            solution = gu.extract_linearize(G)
 
         num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
