@@ -104,17 +104,21 @@ class LiteralTransitivityManager(object):
             if constraint not in self.clauses:
                 self.clauses.append(constraint)
 
-    def constraints(self):
+    def constraints(self, num_iter=None):
         """
         The dependency chain assures that transitivity constraints
         are satisfied.
         :return: cnf clauses to enforce transitivity for all literals
         """
         self.__scan()
-        size = -1
 
-        # Since __enforce_dependencies(lit) may alter the literal translator,
-        # we update until its size no longer changes.
+        if num_iter:
+            for _ in range(num_iter):
+                for literal in self.lt.literals():
+                    self.__enforce_dependencies(literal)
+            return self.clauses
+
+        size = -1
         while not len(self.clauses) == size:
             size = len(self.clauses)
             for literal in self.lt.literals():

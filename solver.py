@@ -89,7 +89,7 @@ def original_solver(constraints):
     return valid
 
 
-def pycosatSolve(constraints, limit):
+def pycosat_solve(constraints, limit):
     cnf = list()
     clauses = dict()
     reverse_clauses = dict()
