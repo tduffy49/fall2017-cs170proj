@@ -1,6 +1,5 @@
 import networkx as nx
 
-
 def build_graph(lst):
     """
     For string "Name1<Name2", add and edge from name1 to name2.
@@ -16,19 +15,15 @@ def build_graph(lst):
         G.add_edge(name1, name2)
     return G
 
-def build_dag(lst):
-    G = nx.DiGraph()
 
-
-def linearize(graph):
+def linearize(dag):
     """
-    :param graph: A graph
+    :param dag: A dag
     :return: list of node values in linearized order
     """
-    if nx.is_directed_acyclic_graph(graph):
-        return list(nx.topological_sort(graph))
+    if not nx.is_directed_acyclic_graph(dag):
+        return AssertionError('Graph must be a Directed Acyclic Graph.')
 
-    dag = nx.bfs_tree(graph)
     return list(nx.topological_sort(dag))
 
 def extract_dag(g):

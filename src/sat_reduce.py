@@ -1,6 +1,30 @@
 from satispy import Variable, Cnf
 import dag_utils as dg
 import pycosat as ps
+import networkx as nx
+import random
+
+def check(constraints, solution):
+    """
+    :param constraints: instance of WizardOrdering
+    :param solution: supposed solution
+    :return: True if `solution` is valid
+    """
+    if len(solution) == 0:
+        return False
+
+    for constraint in constraints:
+        a, b, c = constraint
+        ci = solution.index(c)
+        bi = solution.index(b)
+        ai = solution.index(a)
+        v1 = (ci < ai and ci < bi)
+        v2 = (ci > ai and ci > bi)
+        if not (v1 or v2):
+            return False
+
+    return True
+
 
 # ====================
 # PycoSat Reduction
@@ -73,7 +97,9 @@ class LiteralTransitivityManager(object):
     def __init__(self, lt):
         self.lt = lt
         self.dependencies = {}
-        self.clauses = []           # Transitivity clauses to be added.
+        self.clauses = []
+
+        self.__scan()
 
     def __scan(self):
         for lit in self.lt.literals():
@@ -111,15 +137,18 @@ class LiteralTransitivityManager(object):
         are satisfied.
         :return: cnf clauses to enforce transitivity for all literals
         """
-        self.__scan()
-
+        size = -1
         if num_iter:
             for _ in range(num_iter):
                 for literal in self.lt.literals():
                     self.__enforce_dependencies(literal)
+                    # Terminate if size does not change, .i.e. no updates
+                    if size == len(self.clauses):
+                        return self.clauses
+                    size = len(self.clauses)
+
             return self.clauses
 
-        size = -1
         while not len(self.clauses) == size:
             size = len(self.clauses)
             for literal in self.lt.literals():
@@ -148,13 +177,7 @@ class LiteralConsistencyManager(object):
 
         return clauses
 
-
-def reduce_pycosat(constraints, lt):
-    """
-    :param constraints:
-    :param lt: a LiteralTranslator object
-    :return: normal form in Pycosat spec
-    """
+def __scan_clauses_pycosat(constraints, lt):
     cnf = []
     for constraint in constraints:
         a, b, c = constraint
@@ -167,6 +190,16 @@ def reduce_pycosat(constraints, lt):
         cnf.append([-x1, -x4])
         cnf.append([-x2, -x3])
 
+    return cnf
+
+def reduce_pycosat(constraints, lt):
+    """
+    :param constraints:
+    :param lt: a LiteralTranslator object
+    :return: normal form in Pycosat spec
+    """
+    cnf = __scan_clauses_pycosat(constraints, lt)
+
     T = LiteralTransitivityManager(lt)
     t_constraints = T.constraints(num_iter=4)
     cnf.extend(t_constraints)
@@ -178,7 +211,7 @@ def reduce_pycosat(constraints, lt):
     return cnf
 
 
-def solve_pycosat(cnf):
+def run_pycosat(cnf):
     return ps.solve(cnf)
 
 
@@ -187,7 +220,7 @@ def translate_pycosat(solution, lt):
     Returns a list of string literals, i.e. ["Harry < Hermione", "Hermione < Dumbledore"]
     :param solution: solution in Pycosat spec
     :param lt: same LiteralTranslator object used for reduction
-    :return: list of string literals inequalities
+    :return: list of wizards
     """
     literals = []
     for key in solution:
@@ -196,6 +229,45 @@ def translate_pycosat(solution, lt):
 
     G = dg.build_graph(literals)
     return dg.linearize(G)
+
+def translate_pycosat_randomize(solution, lt):
+    """
+    For when graph may not be a DAG.
+    :param solution: assignment of literals
+    :param lt: literal translator object
+    :return: list of wizards
+    """
+    literals = []
+    for key in solution:
+        if key > 0:
+            literals.append(lt.translate(key))
+
+    # Graph may not be a DAG here.
+    G = dg.build_graph(literals)
+    if nx.is_directed_acyclic_graph(G):
+        return dg.linearize(G)
+
+    dag = nx.dfs_tree(G, random.choice(list(G.nodes())))
+    return dg.linearize(dag)
+
+def solve_pycosat_randomize(constraints):
+    lt = LiteralTranslator()
+    cnf = __scan_clauses_pycosat(constraints, lt)
+
+    num_scans = 1
+    solution = []
+    while not check(constraints, solution):
+        T = LiteralTransitivityManager(lt)
+        t_constraints = T.constraints(num_iter=num_scans)
+        C = LiteralConsistencyManager(lt)
+        c_constraints = C.constraints()
+
+        assignments = run_pycosat(cnf + t_constraints + c_constraints)
+        solution = translate_pycosat_randomize(assignments, lt)
+
+        num_scans *= 2
+
+    return solution
 
 # ====================
 # Satispy Reduction

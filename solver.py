@@ -149,9 +149,11 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
+    return sr.solve_pycosat_randomize(constraints)
+
     L = sr.LiteralTranslator()
     cnf = sr.reduce_pycosat(constraints, L)
-    solution = sr.solve_pycosat(cnf)
+    solution = sr.run_pycosat(cnf)
 
     return sr.translate_pycosat(solution, L)
 
