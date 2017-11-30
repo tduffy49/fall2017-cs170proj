@@ -5,7 +5,7 @@ def build_graph(lst):
     """
     For string "Name1<Name2", add and edge from name1 to name2.
     :param lst: list of edge strings, i.e. "Dumbledore<Harry"
-    :return: a Graph
+    :return: a directed graph
     """
     G = nx.DiGraph()
     for elem in lst:
@@ -27,7 +27,7 @@ def linearize(dag):
 
 def extract_dag(g):
     """
-    :param g: A graph
+    :param g: A directed graph, not necessarily acyclic
     :return: a DAG extracted
     """
     return NotImplementedError

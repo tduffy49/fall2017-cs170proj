@@ -29,6 +29,8 @@ class TestDagMethods(unittest.TestCase):
                 (result == ["Hermione", "Harry", "Dumbledore", "Snape"])
         self.assertTrue(valid)
 
+    def test_extract_dag(self):
+        return NotImplementedError
 
 if __name__ == '__main__':
     unittest.main()
