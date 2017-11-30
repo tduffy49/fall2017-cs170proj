@@ -167,7 +167,7 @@ def reduce_pycosat(constraints, lt):
         cnf.append([-x2, -x3])
 
     T = LiteralTransitivityManager(lt)
-    t_constraints = T.constraints()
+    t_constraints = T.constraints(num_iter=1)
     cnf.extend(t_constraints)
 
     C = LiteralConsistencyManager(lt)

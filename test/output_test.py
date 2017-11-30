@@ -30,7 +30,8 @@ class OutputTest(unittest.TestCase):
     DIR_INPUTS_35 = "phase2_inputs/inputs35"
     DIR_INPUTS_50 = "phase2_inputs/inputs50"
 
-    DIR_TESTS = [DIR_INPUTS_20, DIR_INPUTS_35, DIR_INPUTS_50]
+    DIR_TESTS = [DIR_INPUTS_20]
+    DIR_STAFF = "staff_inputs"
 
     def test_inputs(self):
         for dir in self.DIR_TESTS:
@@ -38,8 +39,15 @@ class OutputTest(unittest.TestCase):
             files = sorted(files, key=str.lower)
             for file in files:
                 self.assertTrue(test_passed_input(files, dir))
-                print ('\n' + file + ' passed.')
+                print (file + ' passed.')
 
+    def test_staff_inputs(self):
+        files = os.listdir(self.DIR_STAFF)
+        files = sorted(files, key=str.lower)
+        for file in files:
+            print ('Testing: ' + file)
+            self.assertTrue(test_passed_input(files, self.DIR_STAFF))
+            print (file + ' passed.')
 
 if __name__ == '__main__':
     unittest.main()

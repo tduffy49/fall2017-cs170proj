@@ -1,38 +1,38 @@
 #!/bin/bash
 
 echo running staff_60
-python3 solver.py staff_inputs/staff_60.in phase2_outputs/staff/staff_60.out
+python solver.py staff_inputs/staff_060.in phase2_outputs/staff/staff_60.out
 echo running staff_80
-python3 solver.py staff_inputs/staff_80.in phase2_outputs/staff/staff_80.out
+python solver.py staff_inputs/staff_080.in phase2_outputs/staff/staff_80.out
 echo running staff_100
-python3 solver.py staff_inputs/staff_100.in phase2_outputs/staff/staff_100.out
+python solver.py staff_inputs/staff_100.in phase2_outputs/staff/staff_100.out
 echo running staff_120
-python3 solver.py staff_inputs/staff_120.in phase2_outputs/staff/staff_120.out
+python solver.py staff_inputs/staff_120.in phase2_outputs/staff/staff_120.out
 echo running staff_140
-python3 solver.py staff_inputs/staff_140.in phase2_outputs/staff/staff_140.out
+python solver.py staff_inputs/staff_140.in phase2_outputs/staff/staff_140.out
 echo running staff_160
-python3 solver.py staff_inputs/staff_160.in phase2_outputs/staff/staff_160.out
+python solver.py staff_inputs/staff_160.in phase2_outputs/staff/staff_160.out
 echo running staff_180
-python3 solver.py staff_inputs/staff_180.in phase2_outputs/staff/staff_180.out
+python solver.py staff_inputs/staff_180.in phase2_outputs/staff/staff_180.out
 echo running staff_200
-python3 solver.py staff_inputs/staff_200.in phase2_outputs/staff/staff_200.out
+python solver.py staff_inputs/staff_200.in phase2_outputs/staff/staff_200.out
 echo running staff_220
-python3 solver.py staff_inputs/staff_220.in phase2_outputs/staff/staff_220.out
+python solver.py staff_inputs/staff_220.in phase2_outputs/staff/staff_220.out
 echo running staff_240
-python3 solver.py staff_inputs/staff_240.in phase2_outputs/staff/staff_240.out
+python solver.py staff_inputs/staff_240.in phase2_outputs/staff/staff_240.out
 echo running staff_260
-python3 solver.py staff_inputs/staff_260.in phase2_outputs/staff/staff_260.out
+python solver.py staff_inputs/staff_260.in phase2_outputs/staff/staff_260.out
 echo running staff_280
-python3 solver.py staff_inputs/staff_280.in phase2_outputs/staff/staff_280.out
+python solver.py staff_inputs/staff_280.in phase2_outputs/staff/staff_280.out
 echo running staff_300
-python3 solver.py staff_inputs/staff_300.in phase2_outputs/staff/staff_300.out
+python solver.py staff_inputs/staff_300.in phase2_outputs/staff/staff_300.out
 echo running staff_320
-python3 solver.py staff_inputs/staff_320.in phase2_outputs/staff/staff_320.out
+python solver.py staff_inputs/staff_320.in phase2_outputs/staff/staff_320.out
 echo running staff_340
-python3 solver.py staff_inputs/staff_340.in phase2_outputs/staff/staff_340.out
+python solver.py staff_inputs/staff_340.in phase2_outputs/staff/staff_340.out
 echo running staff_360
-python3 solver.py staff_inputs/staff_360.in phase2_outputs/staff/staff_360.out
+python solver.py staff_inputs/staff_360.in phase2_outputs/staff/staff_360.out
 echo running staff_380
-python3 solver.py staff_inputs/staff_380.in phase2_outputs/staff/staff_380.out
+python solver.py staff_inputs/staff_380.in phase2_outputs/staff/staff_380.out
 echo running staff_400
-python3 solver.py staff_inputs/staff_400.in phase2_outputs/staff/staff_400.out
+python solver.py staff_inputs/staff_400.in phase2_outputs/staff/staff_400.out
