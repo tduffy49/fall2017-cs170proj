@@ -3,6 +3,8 @@ import dag_utils as dg
 import pycosat as ps
 import networkx as nx
 import random
+import math
+
 
 def check(constraints, solution):
     """
@@ -201,7 +203,7 @@ def reduce_pycosat(constraints, lt):
     cnf = __scan_clauses_pycosat(constraints, lt)
 
     T = LiteralTransitivityManager(lt)
-    t_constraints = T.constraints(num_iter=4)
+    t_constraints = T.constraints()
     cnf.extend(t_constraints)
 
     C = LiteralConsistencyManager(lt)
@@ -230,6 +232,10 @@ def translate_pycosat(solution, lt):
     G = dg.build_graph(literals)
     return dg.linearize(G)
 
+# ========================
+# Pycosat Randomized
+# ========================
+
 def translate_pycosat_randomize(solution, lt):
     """
     For when graph may not be a DAG.
@@ -247,8 +253,14 @@ def translate_pycosat_randomize(solution, lt):
     if nx.is_directed_acyclic_graph(G):
         return dg.linearize(G)
 
-    dag = nx.dfs_tree(G, random.choice(list(G.nodes())))
+    tree_type = random.choice([nx.bfs_tree, nx.dfs_tree])
+    dag = tree_type(G, random.choice(list(G.nodes())))
     return dg.linearize(dag)
+
+
+# How many transitivity scans we do in the next iteration if current one fails.
+TRANSITIVITY_KICK_FACTOR = 1.5
+
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
@@ -265,7 +277,7 @@ def solve_pycosat_randomize(constraints):
         assignments = run_pycosat(cnf + t_constraints + c_constraints)
         solution = translate_pycosat_randomize(assignments, lt)
 
-        num_scans *= 2
+        num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
     return solution
 

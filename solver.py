@@ -151,11 +151,6 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     """
     return sr.solve_pycosat_randomize(constraints)
 
-    L = sr.LiteralTranslator()
-    cnf = sr.reduce_pycosat(constraints, L)
-    solution = sr.run_pycosat(cnf)
-
-    return sr.translate_pycosat(solution, L)
 
 
 """
