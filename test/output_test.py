@@ -29,7 +29,7 @@ class OutputTest(unittest.TestCase):
     DIR_INPUTS_35 = "phase2_inputs/inputs35"
     DIR_INPUTS_50 = "phase2_inputs/inputs50"
 
-    DIR_TESTS = [DIR_INPUTS_20]
+    DIR_TESTS = [DIR_INPUTS_20, DIR_INPUTS_35, DIR_INPUTS_50]
     DIR_STAFF = "staff_inputs"
 
     def test_inputs(self):

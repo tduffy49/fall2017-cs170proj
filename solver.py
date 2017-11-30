@@ -152,10 +152,8 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     L = sr.LiteralTranslator()
     cnf = sr.reduce_pycosat(constraints, L)
     solution = sr.solve_pycosat(cnf)
-    literals = sr.translate_pycosat(solution, L)
 
-    G = dg.build_graph(literals)
-    return dg.linearize(G)
+    return sr.translate_pycosat(solution, L)
 
 
 """

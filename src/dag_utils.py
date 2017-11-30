@@ -16,14 +16,20 @@ def build_graph(lst):
         G.add_edge(name1, name2)
     return G
 
+def build_dag(lst):
+    G = nx.DiGraph()
 
-def linearize(dag):
+
+def linearize(graph):
     """
-    :param dag: DAG
+    :param graph: A graph
     :return: list of node values in linearized order
     """
-    return list(nx.topological_sort(dag))
+    if nx.is_directed_acyclic_graph(graph):
+        return list(nx.topological_sort(graph))
 
+    dag = nx.bfs_tree(graph)
+    return list(nx.topological_sort(dag))
 
 def extract_dag(g):
     """

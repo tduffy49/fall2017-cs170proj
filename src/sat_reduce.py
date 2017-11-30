@@ -1,4 +1,5 @@
 from satispy import Variable, Cnf
+import dag_utils as dg
 import pycosat as ps
 
 # ====================
@@ -167,7 +168,7 @@ def reduce_pycosat(constraints, lt):
         cnf.append([-x2, -x3])
 
     T = LiteralTransitivityManager(lt)
-    t_constraints = T.constraints(num_iter=1)
+    t_constraints = T.constraints(num_iter=4)
     cnf.extend(t_constraints)
 
     C = LiteralConsistencyManager(lt)
@@ -193,7 +194,8 @@ def translate_pycosat(solution, lt):
         if key > 0:
             literals.append(lt.translate(key))
 
-    return literals
+    G = dg.build_graph(literals)
+    return dg.linearize(G)
 
 # ====================
 # Satispy Reduction
