@@ -9,20 +9,19 @@ from solver import read_input, write_output, solve
 from sat_test import check
 
 # Determines whether tests should also write output of solution to file.
-SHOULD_WRITE_OUTPUT = False
+SHOULD_WRITE_OUTPUT = True
 
 
-def test_passed_input(files, dir):
-    for file in files:
-        num_wizards, num_constraints, wizards, constraints = read_input(os.path.join(dir, file))
-        solution = solve(num_wizards, num_constraints, wizards, constraints)
+def test_passed_input(file, dir):
+    num_wizards, num_constraints, wizards, constraints = read_input(os.path.join(dir, file))
+    solution = solve(num_wizards, num_constraints, wizards, constraints)
 
-        if SHOULD_WRITE_OUTPUT and check(constraints, solution):
-            out_dir = dir.replace('input', 'output')
-            out_file = file.replace('.in', '.out')
-            write_output(os.path.join(out_dir, out_file), solution)
+    if SHOULD_WRITE_OUTPUT and check(constraints, solution):
+        out_dir = dir.replace('input', 'output')
+        out_file = file.replace('.in', '.out')
+        write_output(os.path.join(out_dir, out_file), solution)
 
-        return check(constraints, solution)
+    return check(constraints, solution)
 
 
 class OutputTest(unittest.TestCase):
@@ -38,7 +37,7 @@ class OutputTest(unittest.TestCase):
             files = os.listdir(dir)
             files = sorted(files, key=str.lower)
             for file in files:
-                self.assertTrue(test_passed_input(files, dir))
+                self.assertTrue(test_passed_input(file, dir))
                 print (file + ' passed.')
 
     def test_staff_inputs(self):
@@ -46,7 +45,7 @@ class OutputTest(unittest.TestCase):
         files = sorted(files, key=str.lower)
         for file in files:
             print ('Testing: ' + file)
-            self.assertTrue(test_passed_input(files, self.DIR_STAFF))
+            self.assertTrue(test_passed_input(file, self.DIR_STAFF))
             print (file + ' passed.')
 
 if __name__ == '__main__':

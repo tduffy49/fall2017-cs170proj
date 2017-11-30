@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # fall2017-cs170proj
 Fall 2017 CS170 Project
 ### CS 170 Efficient Algorithms and Intractable Problems
