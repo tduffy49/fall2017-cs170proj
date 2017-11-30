@@ -5,7 +5,7 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 import src.sat_reduce as sat
-import src.dag_utils as dag
+import src.gutils as dag
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
 

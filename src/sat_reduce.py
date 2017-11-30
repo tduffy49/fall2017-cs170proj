@@ -1,9 +1,8 @@
 from satispy import Variable, Cnf
 import utils
-import dag_utils as dg
+import gutils as gu
 import pycosat as ps
 import networkx as nx
-import random
 import math
 
 
@@ -222,8 +221,8 @@ def solve_pycosat(constraints):
     assignments = translate_pycosat(sat, lt)
 
     # Deterministic reduction. Solution must be a DAG or cannot exist.
-    dag = dg.build_graph(assignments)
-    return dg.linearize(dag)
+    dag = gu.build_graph(assignments)
+    return gu.linearize(dag)
 
 # ========================
 # Pycosat Randomized
@@ -231,8 +230,6 @@ def solve_pycosat(constraints):
 
 # How many transitivity scans we do in the next iteration if current one fails.
 TRANSITIVITY_KICK_FACTOR = 1.5
-TRANSITIVITY_SCAN_CAP = 100000
-
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
@@ -250,17 +247,13 @@ def solve_pycosat_randomize(constraints):
         sat = run_pycosat(sat_clauses)
 
         assignments = translate_pycosat(sat, lt)
-        G = dg.build_graph(assignments)
+        G = gu.build_graph(assignments)
         if nx.is_directed_acyclic_graph(G):
-            solution = dg.linearize(G)
+            solution = gu.linearize(G)
         else:
-            tree_type = random.choice([nx.dfs_tree, nx.bfs_tree])
-            dag = tree_type(G, random.choice(list(G.nodes())))
-            # TODO: Bug found. Fix later.
-            # Seems like this is not a DFS in Algorithms but an explore() operation that may not reach all nodes.
-            solution = None
+            solution = gu.extract_dag(G)
 
-        num_scans = int(min(TRANSITIVITY_SCAN_CAP, int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))))
+        num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
     return solution
 

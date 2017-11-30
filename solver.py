@@ -1,5 +1,5 @@
 import argparse
-import src.dag_utils as dg
+import src.gutils as dg
 import src.sat_reduce as sr
 import pycosat
 import itertools

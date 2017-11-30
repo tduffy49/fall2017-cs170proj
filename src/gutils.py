@@ -1,4 +1,5 @@
 import networkx as nx
+import random
 
 def build_graph(lst):
     """
@@ -26,9 +27,22 @@ def linearize(dag):
 
     return list(nx.topological_sort(dag))
 
+
 def extract_dag(g):
     """
-    :param g: A directed graph, not necessarily acyclic
-    :return: a DAG extracted
+    Returns all nodes of the graph in a DFS tree
+    :param g: graph
+    :return: DFS tree
     """
-    return NotImplementedError
+    visited = set()
+    not_visited = set(g.nodes())
+    result = []
+    while len(visited) != g.number_of_nodes():
+        tree_set = set(nx.dfs_tree(g, random.sample(not_visited, 1)[0]))
+        not_visited = not_visited.difference(tree_set)
+        visited = visited.union(tree_set)
+
+        # Add to the beginning of list.
+        result = list(tree_set) + result
+
+    return result
