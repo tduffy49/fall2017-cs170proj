@@ -260,7 +260,7 @@ def translate_pycosat_randomize(solution, lt):
 
 # How many transitivity scans we do in the next iteration if current one fails.
 TRANSITIVITY_KICK_FACTOR = 1.5
-
+TRANSITIVITY_SCAN_CAP = 20
 
 def solve_pycosat_randomize(constraints):
     lt = LiteralTranslator()
@@ -277,8 +277,7 @@ def solve_pycosat_randomize(constraints):
         assignments = run_pycosat(cnf + t_constraints + c_constraints)
         solution = translate_pycosat_randomize(assignments, lt)
 
-        num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
-
+        num_scans = int(min(TRANSITIVITY_SCAN_CAP, math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR)))
     return solution
 
 # ====================
