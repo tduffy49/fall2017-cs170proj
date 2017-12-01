@@ -27,9 +27,9 @@ class LiteralTranslator(object):
 
         self.shuffle = shuffle
         if shuffle:
-            self.constraints = random.shuffle(constraints)
+            self._constraints = random.shuffle(constraints)
         else:
-            self.constraints = constraints
+            self._constraints = constraints
         # Do a base scan of all constraints.
         self.__add_constraints(constraints)
 
@@ -87,8 +87,26 @@ class LiteralTranslator(object):
         self.key_to_literal.clear()
         self.counter = 1
         if self.shuffle:
-            self.constraints = random.shuffle(self.constraints)
-        self.__add_literals(self.constraints)
+            self._constraints = random.shuffle(self._constraints)
+        self.__add_literals(self._constraints)
+
+    def constraints(self):
+        cnf = set()
+        for constraint in self._constraints:
+            a, b, c = constraint
+            x1 = self.find_literal('%s < %s' % (a, c))
+            x2 = self.find_literal('%s < %s' % (c, a))
+            x3 = self.find_literal('%s < %s' % (b, c))
+            x4 = self.find_literal('%s < %s' % (c, b))
+            if not x1 or not x2 or not x3 or not x4:
+                return LookupError
+
+            cnf.add((x1, x2))
+            cnf.add((x3, x4))
+            cnf.add((-x1, -x4))
+            cnf.add((-x2, -x3))
+
+        return cnf
 
 
 class LiteralTransitivityManager(object):
@@ -147,9 +165,10 @@ class LiteralTransitivityManager(object):
 
         size = -1
         if num_iter:
-            for literal in self.lt.literals():
-                self.__enforce_dependencies(literal)
-                # Terminate if size does not change, .i.e. no updates
+            for _ in range(num_iter):
+                for literal in self.lt.literals():
+                    self.__enforce_dependencies(literal)
+                    # Terminate if size does not change, .i.e. no updates
                 if size == len(self.clauses):
                     return self.clauses
 
@@ -186,39 +205,24 @@ class LiteralConsistencyManager(object):
         return clauses
 
 
-def __scan_clauses_pycosat(constraints, lt):
-    cnf = set()
-    for constraint in constraints:
-        a, b, c = constraint
-        x1 = lt.touch_literal('%s < %s' % (a, c))
-        x2 = lt.touch_literal('%s < %s' % (c, a))
-        x3 = lt.touch_literal('%s < %s' % (b, c))
-        x4 = lt.touch_literal('%s < %s' % (c, b))
-        cnf.add((x1, x2))
-        cnf.add((x3, x4))
-        cnf.add((-x1, -x4))
-        cnf.add((-x2, -x3))
-
-    return cnf
-
-
-def reduce_pycosat(constraints, lt):
+def reduce_pycosat(constraints):
     """
     :param constraints:
     :param lt: a LiteralTranslator object
     :return: normal form in Pycosat spec
     """
-    cnf = __scan_clauses_pycosat(constraints, lt)
+    L = LiteralTranslator(constraints)
+    result = list(L.constraints())
 
-    T = LiteralTransitivityManager(lt)
+    T = LiteralTransitivityManager(L)
     t_constraints = T.constraints()
-    result = list(cnf) + list(t_constraints)
+    result += list(t_constraints)
 
-    C = LiteralConsistencyManager(lt)
+    C = LiteralConsistencyManager(L)
     c_constraints = C.constraints()
     result += list(c_constraints)
 
-    return cnf
+    return result
 
 
 def run_pycosat(cnf):
@@ -242,7 +246,7 @@ def translate_pycosat(solution, lt):
 
 def solve_pycosat(constraints):
     lt = LiteralTranslator(constraints)
-    cnf = reduce_pycosat(constraints, lt)
+    cnf = reduce_pycosat(constraints)
     sat = run_pycosat(cnf)
     assignments = translate_pycosat(sat, lt)
 
@@ -276,14 +280,20 @@ class SimulatedAnnealingReduction(object):
 
     def search_neighborhood(self, solution):
         """
-        Randomized search in the neighborhood of number of scans.
-        :param solution: original solution
-        :return: solution with new number of scans
+        Randomized search in the neighborhood of number of scans. Heuristics include:
+        + number of scans
+        + current SAT clauses
+        :param solution: s
+        :return: neighboring s' to s according to heuristics.
         """
+        L = LiteralTranslator(self.constraints)
+        base_clauses = L._constraints()
+        T = LiteralTransitivityManager(L)
+
         return NotImplementedError
 
     def solve(self):
-        solution = self._Solution([], 1)
+        solution = self._Solution([], 1, [])
         while not utils.check(self.constraints, solution.ordering):
             # Find solution s' in neighborhood of s
             solution_p = self.search_neighborhood(solution)
@@ -300,18 +310,21 @@ class SimulatedAnnealingReduction(object):
         return solution.ordering
 
     class _Solution(object):
-        def __init__(self, ordering, num_scans):
+        """
+        Shell object for simulated annealing.
+        """
+        def __init__(self, ordering, num_scans, sat_clauses):
             self.ordering = ordering
             self.num_scans = num_scans
+            self.clauses = sat_clauses
 
 
 def solve_pycosat_randomize(constraints):
-    lt = LiteralTranslator(constraints)
-    cnf = __scan_clauses_pycosat(constraints, lt)
-
     num_scans = 2
     solution = []
     while not utils.check(constraints, solution):
+        lt = LiteralTranslator(constraints)
+        cnf = lt.constraints()
 
         T = LiteralTransitivityManager(lt)
         t_constraints = T.constraints(num_iter=num_scans)
@@ -331,6 +344,7 @@ def solve_pycosat_randomize(constraints):
         num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
     return solution
+
 
 # ====================
 # Satispy Reduction

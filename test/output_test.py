@@ -6,7 +6,7 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 from solver import read_input, write_output, solve
-from sat_test import check
+from src.utils import check
 
 # Determines whether tests should also write output of solution to file.
 SHOULD_WRITE_OUTPUT = False
@@ -39,6 +39,9 @@ class OutputTest(unittest.TestCase):
             for file in files:
                 self.assertTrue(test_passed_input(file, dir))
                 print (file + ' passed.')
+        file = 'staff_060.in'
+        self.assertTrue(test_passed_input(file, self.DIR_STAFF))
+        print (file + ' passed.')
 
     @unittest.skip('Heavy lifting here....')
     def test_staff_inputs(self):
