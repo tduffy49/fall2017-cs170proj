@@ -278,31 +278,43 @@ class ConstraintManager(object):
 
         return clauses
 
-    def transitivity_constraints(self, clauses, num_required=None):
+    @staticmethod
+    def __inequalities_in_(translator, clauses):
+        literals = set()
+        for clause in clauses:
+            for key in clause:
+                literal = translator.key_to_inequality(abs(key))
+                literals.add(literal)
+
+        return literals
+
+    def transitivity_constraints(self, clauses, num_required=None, num_iter=None):
         """
         :param clauses: [ (x1, -x2, x3) ] literals in key form
         :param num_required: number of unique transitivity constraints required, may
         output below this number if scans finished
+        :param num_iter: number of total scans
         :return: set of clauses enforcing transitivity
         """
         result = set()
         dependencies = self.__process_dependencies(
             self.translator, dict(), clauses
         )
-        size = -1
+        size, i = -1, 0
         while size != len(result):
             size = len(result)
-            for clause in clauses:
-                for key in clause:
-                    literal = self.translator.key_to_inequality(abs(key))
-                    new_clauses = ConstraintManager.__dependency_constraints(
-                        self.translator, dependencies, literal
-                    )
-                    result = result.union(new_clauses)
+            for literal in self.translator.inequalities():
+                new_clauses = ConstraintManager.__dependency_constraints(
+                    self.translator, dependencies, literal
+                )
+                result = result.union(new_clauses)
 
-                    # return if result has more clauses than num_required
-                    if num_required and len(result.difference(clauses)) >= num_required:
-                        return result
+                # return if result has more clauses than num_required
+                if num_required and len(result) >= num_required:
+                    return result
+            i += 1
+            if not i < num_iter:
+                return result
 
         return result
 
@@ -443,10 +455,12 @@ class SimulatedAnnealingReduction(object):
         return RuntimeError
 
     # Neighborhood search heuristics.
-    T_CLAUSES_RETAIN_FACTOR = 0.8               # Retained clauses has to be less than scan decrease factor.
+    T_CLAUSES_RETAIN_FACTOR = 0.0               # Retained clauses has to be less than scan decrease factor.
+    NUM_T_SCANS_DECREASE_FACTOR = 0.8
+    NUM_T_SCANS_INCREASE_FACTOR = 4
     NUM_T_CLAUSES_DECREASE_FACTOR = 0.8         # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_FACTOR = 4           # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_INC = 100            # Always increment clauses by certain amount.
+    NUM_T_CLAUSES_INCREASE_FACTOR = 1.1         # Number of total transitivity clauses.
+    NUM_T_CLAUSES_INCREASE_INC = 10000          # Always increment clauses by certain amount.
 
     def search_neighborhood(self, solution):
         """
@@ -458,44 +472,47 @@ class SimulatedAnnealingReduction(object):
         :return: neighboring s' to s according to heuristics.
         """
         L = self.translator
-        base_clauses = L.base_clauses()
+        base_clauses = list(L.base_clauses())
         C = ConstraintManager(self.translator)
+        T = LiteralTransitivityManager(L)
 
         num_t_clauses_p = int(
             len(solution.t_clauses)
             * random.choice([self.NUM_T_CLAUSES_DECREASE_FACTOR, self.NUM_T_CLAUSES_INCREASE_FACTOR])
             + self.NUM_T_CLAUSES_INCREASE_INC
         )
-        
+
         # Allow neighborhood search by constraints kept.
-        t_clauses_retained = set(random.sample(
+        t_clauses_retained = random.sample(
             solution.t_clauses,
             int(min(num_t_clauses_p * self.T_CLAUSES_RETAIN_FACTOR, len(solution.t_clauses)))
-        ))
-        t_clauses_p = t_clauses_retained.union(
-            C.transitivity_constraints(base_clauses.union(t_clauses_retained),
-                                       num_required=num_t_clauses_p - len(t_clauses_retained))
+        )
+        
+        num_t_scans_p = int(solution.num_t_scans
+                            * random.choice([self.NUM_T_SCANS_DECREASE_FACTOR, self.NUM_T_SCANS_INCREASE_FACTOR]))
+        t_clauses_p = t_clauses_retained + list(
+            T.constraints(num_iter=num_t_scans_p)
         )
 
-        clauses = base_clauses.union(t_clauses_p)
-        c_clauses_p = C.consistency_constraints(clauses)
-        clauses = clauses.union(c_clauses_p)
+        clauses = base_clauses + t_clauses_p
+        c_clauses_p = list(C.consistency_constraints(clauses))
+        clauses = clauses + c_clauses_p
 
         assignments = run_pycosat(clauses)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
-        solution_p = self._Solution(ordering, t_clauses_p)
+        solution_p = self._Solution(ordering, t_clauses_p, num_t_scans_p)
 
         return solution_p
 
     # Simulated annealing factor, analogous to cooling glass (gets more rigid over time).
-    ANNEAL_FACTOR = 0.8
+    ANNEAL_FACTOR = 0.98
 
     def solve(self):
         """
         :return: list of wizards in order that satisfies ALL constraints
         """
-        solution = self._Solution([], [])
+        solution = self._Solution([], [], 1)
         num_iteration = 0
         while not utils.check(self.constraints, solution.ordering):
             # Find solution s' in neighborhood of s
@@ -517,14 +534,15 @@ class SimulatedAnnealingReduction(object):
         """
         Shell object for simulated annealing.
         """
-        def __init__(self, ordering, t_clauses):
+        def __init__(self, ordering, t_clauses, num_t_scans):
             """
             :param ordering: wizard ordering
             :param t_clauses: transitivity clauses
+            :param num_t_scans: number of transitivity scans
             """
             self.ordering = ordering
             self.t_clauses = t_clauses
-
+            self.num_t_scans = num_t_scans
 
 def solve_pycosat_annealing(constraints):
     return SimulatedAnnealingReduction(constraints).solve()
