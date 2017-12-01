@@ -31,9 +31,9 @@ class LiteralTranslator(object):
         else:
             self.constraints = constraints
         # Do a base scan of all constraints.
-        self.__add_constraints(constraints)
+        self.__process_constraints(constraints)
 
-    def __add_constraints(self, constraints):
+    def __process_constraints(self, constraints):
         for constraint in constraints:
             a, b, c = constraint
             self.touch_literal('%s < %s' % (a, c))
