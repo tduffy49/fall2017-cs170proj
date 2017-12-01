@@ -3,42 +3,24 @@ import sys
 import os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-
+import src.utils as utils
 import src.sat_reduce as sat
-import src.gutils as dag
+import src.gutils as gu
 from satispy import Variable, Cnf
 from satispy.solver import Minisat
 
-def check(constraints, solution):
-    """
-    :param constraints: instance of WizardOrdering
-    :param solution: supposed solution
-    :return: True if `solution` is valid
-    """
-    for constraint in constraints:
-        a, b, c = constraint
-        ci = solution.index(c)
-        bi = solution.index(b)
-        ai = solution.index(a)
-        v1 = (ci < ai and ci < bi)
-        v2 = (ci > ai and ci > bi)
-        if not (v1 or v2):
-            return False
-
-    return True
 
 class TestPycosatReduction(unittest.TestCase):
     def test_reduce_pycosat(self):
         constraints = [("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")]
+        s1 = sat.solve_pycosat(constraints)
+        s2 = sat.solve_pycosat_randomize(constraints)
+        s3 = sat.SimulatedAnnealingReduction(constraints).solve()
 
-        L = sat.LiteralTranslator(constraints)
-        cnf = sat.reduce_pycosat([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")], L)
-        solution = sat.run_pycosat(cnf)
-        literals = sat.translate_pycosat(solution, L)
-        G = dag.build_graph(literals)
-        wizard_ordering = dag.linearize(G)
+        self.assertTrue(utils.check(constraints, s1))
+        self.assertTrue(utils.check(constraints, s2))
+        self.assertTrue(utils.check(constraints, s3))
 
-        self.assertTrue(check(constraints, wizard_ordering))
 
 class TestSatispyReduction(unittest.TestCase):
     def setUp(self):
