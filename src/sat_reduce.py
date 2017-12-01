@@ -20,8 +20,8 @@ class LiteralTranslator(object):
     lt.translate(key)                       # "Harry < Hermione"
     lt.touch_literal("Harry < Hermione")    # `key`
     """
-    def __init__(self, constraints, shuffle=False):
-        self.counter = 1
+    def __init__(self, constraints, counter=1, shuffle=False):
+        self.counter = counter
         self.literal_to_key = {}
         self.key_to_literal = {}
 
@@ -82,14 +82,16 @@ class LiteralTranslator(object):
     def literals(self):
         return self.literal_to_key.keys()
 
-    def reset(self):
-        self.literal_to_key.clear()
-        self.key_to_literal.clear()
-        self.counter = 1
-        if self.shuffle:
-            self._constraints = random.shuffle(self._constraints)
-        self.__add_literals(self._constraints)
+    def __add__(self, other):
+        """
 
+        :param other:
+        :return:
+        """
+        L = LiteralTranslator(self._constraints, len(self.literal_to_key) + len(other.literals()), self.shuffle)
+        # TODO: How do we preserve translation ability when key conflicts?
+        return NotImplementedError
+    
     def constraints(self):
         cnf = set()
         for constraint in self._constraints:
@@ -162,16 +164,18 @@ class LiteralTransitivityManager(object):
         """
         size = -1
         if num_iter:
-            for _ in range(num_iter):
+            while True:
                 for literal in self.lt.literals():
                     self.__enforce_dependencies(literal)
-                    # Terminate if size does not change, .i.e. no updates
+
+                    num_iter -= 1
+                    if num_iter < 0:
+                        return self.clauses
+
+                # Terminate if size does not change for 1 whole scan, .i.e. no updates
                 if size == len(self.clauses):
                     return self.clauses
-
                 size = len(self.clauses)
-
-            return self.clauses
 
         while not len(self.clauses) == size:
             size = len(self.clauses)
@@ -185,7 +189,7 @@ class LiteralConsistencyManager(object):
     def __init__(self, lt):
         self.lt = lt
 
-    def constraints(self):
+    def all_constraints(self):
         clauses = set()
         for lit in self.lt.literals():
             z, x = lit.split(' < ')
@@ -198,6 +202,24 @@ class LiteralConsistencyManager(object):
             # Both cannot be true.
             constraint = (-n, -m)
             clauses.add(constraint)
+
+        return list(clauses)
+
+    def constraints(self, cnf):
+        clauses = set()
+        for clause in cnf:
+            for key in clause:
+                literal = self.lt.translate(abs(key))
+                z, x = literal.split(' < ')
+                negation = x + ' < ' + z
+                n = self.lt.find_literal(negation)
+                if not n:
+                    continue
+
+                m = self.lt.find_literal(literal)
+                # Both cannot be true.
+                constraint = (-n, -m)
+                clauses.add(constraint)
 
         return list(clauses)
 
@@ -216,7 +238,7 @@ def reduce_pycosat(constraints):
     result += list(t_constraints)
 
     C = LiteralConsistencyManager(L)
-    c_constraints = C.constraints()
+    c_constraints = C.all_constraints()
     result += list(c_constraints)
 
     return result
@@ -259,13 +281,14 @@ def solve_pycosat(constraints):
     # Deterministic reduction. Solution must be a DAG or cannot exist.
     return solution
 
+
 # ========================
 # Pycosat Randomized
 # ========================
 
 
 # How many transitivity scans we do in the next iteration if current one fails.
-TRANSITIVITY_KICK_FACTOR = 1.5
+TRANSITIVITY_KICK_FACTOR = 4
 
 
 class SimulatedAnnealingReduction(object):
@@ -283,38 +306,76 @@ class SimulatedAnnealingReduction(object):
         return len(self.constraints) - \
                utils.num_constraints_satisfied(self.constraints, solution.ordering)
 
+    def __rand_choose(self, elements, probs):
+        """
+        Choose element in elements with probability corresponding to array assigned.
+        :param elements: elements to choose from
+        :param probs: probabilities array that adds to 1
+        :return: element chosen
+        """
+        assert(len(elements) == len(probs))
+        assert(sum(probs) == 1)
+
+        r = random.random()
+        cum_probs = []
+        for i in range(len(probs)):
+            cum_probs.append(sum(probs[:i + 1]))
+        for i in range(len(cum_probs)):
+            if r > cum_probs[i] and i <= cum_probs[i + 1]:
+                return elements[i]
+
+        return RuntimeError
+
+    # Neighborhood search heuristics.
+    T_CLAUSES_RETAIN_FACTOR = 0.8               # Retained clauses has to be less than scan decrease factor.
+    NUM_SCAN_DECREASE_FACTOR = 0.9              # Number of transitivity iterations to go through.
+    NUM_SCAN_INCREASE_FACTOR = 10               # Number of transitivity iterations to go through.
+    NUM_T_CLAUSES_DECREASE_FACTOR = 0.8         # Number of total transitivity clauses.
+    NUM_T_CLAUSES_INCREASE_FACTOR = 4           # Number of total transitivity clauses.
+    NUM_T_CLAUSES_INCREASE_INC = 100            # Always increment clauses by certain amount.
+
     def search_neighborhood(self, solution):
         """
-        Randomized search in the neighborhood of number of scans. Heuristics include:
-        + number of scans
-        + current SAT clauses
+        Randomized search in the neighborhood of solution characteristics. Heuristics comprise
+        of in order of importance:
+        1. transitivity SAT clauses
+        2. number of transitivity scans
+        3. number of transitivity clauses
         :param solution: s
         :return: neighboring s' to s according to heuristics.
         """
-        num_scans_p = int(math.ceil(solution.num_scans * random.choice([0.9, 2])))
-
         L = LiteralTranslator(self.constraints)
         base_clauses = L.constraints()
         T = LiteralTransitivityManager(L)
-        t_clauses = T.constraints(num_iter=num_scans_p)
-        # TODO: ConsistencyManager C may still add unneeded clauses since using same LiteralTranslator.
-        C = LiteralConsistencyManager(L)
-        c_clauses = C.constraints()
 
-        num_clauses_p = min(int(solution.num_clauses * random.choice([0.8, 4])), len(t_clauses))
-        t_clauses_p = random.sample(list(t_clauses), num_clauses_p)
+        num_scans_p = int(math.ceil(solution.num_scans * random.choice([self.NUM_SCAN_DECREASE_FACTOR,
+                                                                        self.NUM_SCAN_INCREASE_FACTOR])))
+        t_clauses = T.constraints(num_iter=num_scans_p)
+        num_t_clauses_p = min(int(len(solution.t_clauses)
+                                  * random.choice([self.NUM_T_CLAUSES_DECREASE_FACTOR,
+                                                   self.NUM_T_CLAUSES_INCREASE_FACTOR]))
+                                  + self.NUM_T_CLAUSES_INCREASE_INC,
+                              len(t_clauses))
+
+        # Allow neighborhood search by constraints kept.
+        t_clauses_retained = random.sample(solution.t_clauses,
+                                           int(self.T_CLAUSES_RETAIN_FACTOR * len(solution.t_clauses)))
+        t_clauses_p = t_clauses_retained + \
+                      random.sample(list(t_clauses), num_t_clauses_p - len(t_clauses_retained))
+
+        C = LiteralConsistencyManager(L)
+        c_clauses = C.constraints(t_clauses_p + base_clauses)
+
         clauses = list(base_clauses) + list(t_clauses_p) + list(c_clauses)
         assignments = run_pycosat(clauses)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
-        solution_p = self._Solution(ordering, num_scans_p, num_clauses_p)
-        print 'T_clauses_p: ' + str(len(t_clauses_p))
-        print len(c_clauses)
+        solution_p = self._Solution(ordering, num_scans_p, t_clauses_p)
 
         return solution_p
 
     def solve(self):
-        solution = self._Solution([], 1, 1000)
+        solution = self._Solution([], 1, [])
         num_iteration = 0
         while not utils.check(self.constraints, solution.ordering):
             # Find solution s' in neighborhood of s
@@ -336,15 +397,15 @@ class SimulatedAnnealingReduction(object):
         """
         Shell object for simulated annealing.
         """
-        def __init__(self, ordering, num_scans, num_clauses):
+        def __init__(self, ordering, num_scans, t_clauses):
             """
             :param ordering: wizard ordering
             :param num_scans: number of scans
-            :param num_clauses: number of transitivity clauses
+            :param t_clauses: transitivity clauses
             """
             self.ordering = ordering
             self.num_scans = num_scans
-            self.num_clauses = num_clauses
+            self.t_clauses = t_clauses
 
 
 def solve_pycosat_randomize(constraints):
@@ -357,7 +418,7 @@ def solve_pycosat_randomize(constraints):
         T = LiteralTransitivityManager(lt)
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
-        c_constraints = C.constraints()
+        c_constraints = C.all_constraints()
 
         sat_clauses = list(cnf) + list(t_constraints) + list(c_constraints)
         sat = run_pycosat(sat_clauses)
@@ -369,41 +430,5 @@ def solve_pycosat_randomize(constraints):
     return solution
 
 
-# ====================
-# Satispy Reduction
-# ====================
-
-
-def touch_variable(name, map):
-    """
-    Find variable map[name] if it exists else create one and map it.
-    :param name: key to mapper
-    :param map: mapping of name to Variable
-    :return: variable found or created
-    """
-    if name in map:
-        var = map[name]
-    else:
-        var = Variable(name)
-        map[name] = var
-    return var
-
-
-def reduce_satispy(constraints):
-    """
-    Reduce constraints from wizards problem into CNF form for our SAT instance.
-    :param constraints: inputs from wizard problem
-    :return: Cnf object
-    """
-    mapping = {}
-    exp = Cnf()
-    for constraint in constraints:
-        a, b, c = constraint
-        x_1 = touch_variable('%s < %s' % (a, c), mapping)
-        x_2 = touch_variable('%s < %s' % (c, a), mapping)
-        x_3 = touch_variable('%s < %s' % (b, c), mapping)
-        x_4 = touch_variable('%s < %s' % (c, b), mapping)
-
-        exp &= (x_1 | x_2) & (x_3 | x_4) & (-x_1 | -x_4) & (-x_2 | -x_3)
-
-    return exp
+def solve_pycosat_annealing(constraints):
+    return SimulatedAnnealingReduction(constraints).solve()
