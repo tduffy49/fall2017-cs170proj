@@ -1,9 +1,9 @@
 from satispy import Variable, Cnf
-import utils
+from copy import deepcopy
+import utils, math, random
 import gutils as gu
 import pycosat as ps
 import networkx as nx
-import math
 
 
 # ====================
@@ -232,6 +232,52 @@ def solve_pycosat(constraints):
 
 # How many transitivity scans we do in the next iteration if current one fails.
 TRANSITIVITY_KICK_FACTOR = 1.5
+
+
+class SimulatedAnnealingReduction(object):
+    """
+    Solution gives an ordering of wizards that satisfies all constraints.
+
+    R = SimulatedAnnealingReduction(constraints)
+    solution = R.solve()
+    """
+    def __init__(self, constraints):
+        self.constraints = constraints
+        self.t = len(constraints)
+
+    def cost(self, solution):
+        return len(self.constraints) - \
+               utils.num_constraints_satisfied(self.constraints, solution)
+
+    def search_neighborhood(self, solution):
+        """
+        Randomized search in the neighborhood of number of scans.
+        :param solution: original solution
+        :return: solution with new number of scans
+        """
+        return NotImplementedError
+
+    def solve(self):
+        solution = self._Solution([], 1)
+        while not utils.check(self.constraints, solution.ordering):
+            # Find solution s' in neighborhood of s
+            solution_p = self.search_neighborhood(solution)
+            delta = self.cost(solution_p) - self.cost(solution)
+            if delta < 0:
+                solution = solution_p
+            else:
+                r = math.e ** (- delta / self.t)
+                if random.random() < r:
+                    solution = solution_p
+            # Anneal by decreasing probability T.
+            self.t = self.t * 0.8
+
+        return solution.ordering
+
+    class _Solution(object):
+        def __init__(self, ordering, num_scans):
+            self.ordering = ordering
+            self.num_scans = num_scans
 
 
 def solve_pycosat_randomize(constraints):

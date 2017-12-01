@@ -40,6 +40,7 @@ class OutputTest(unittest.TestCase):
                 self.assertTrue(test_passed_input(file, dir))
                 print (file + ' passed.')
 
+    @unittest.skip('Heavy lifting here....')
     def test_staff_inputs(self):
         files = os.listdir(self.DIR_STAFF)
         files = sorted(files, key=str.lower)
