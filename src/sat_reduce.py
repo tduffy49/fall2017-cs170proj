@@ -1,9 +1,9 @@
 from satispy import Variable, Cnf
-import utils
+from copy import deepcopy
+import utils, math, random
 import gutils as gu
 import pycosat as ps
 import networkx as nx
-import math
 
 
 # ====================
@@ -20,10 +20,26 @@ class LiteralTranslator(object):
     lt.translate(key)                       # "Harry < Hermione"
     lt.touch_literal("Harry < Hermione")    # `key`
     """
-    def __init__(self):
+    def __init__(self, constraints, shuffle=False):
         self.counter = 1
         self.literal_to_key = {}
         self.key_to_literal = {}
+
+        self.shuffle = shuffle
+        if shuffle:
+            self.constraints = random.shuffle(constraints)
+        else:
+            self.constraints = constraints
+        # Do a base scan of all constraints.
+        self.__add_constraints(constraints)
+
+    def __add_constraints(self, constraints):
+        for constraint in constraints:
+            a, b, c = constraint
+            self.touch_literal('%s < %s' % (a, c))
+            self.touch_literal('%s < %s' % (c, a))
+            self.touch_literal('%s < %s' % (b, c))
+            self.touch_literal('%s < %s' % (c, b))
 
     def __add_literal(self, literal):
         assert(literal not in self.literal_to_key)
@@ -35,7 +51,8 @@ class LiteralTranslator(object):
 
     def __add_literals(self, literals):
         for literal in literals:
-            self.__add_literal(literal)
+            if not literal in self.literal_to_key:
+                self.__add_literal(literal)
 
     def touch_literal(self, literal):
         """
@@ -65,6 +82,14 @@ class LiteralTranslator(object):
     def literals(self):
         return self.literal_to_key.keys()
 
+    def reset(self):
+        self.literal_to_key.clear()
+        self.key_to_literal.clear()
+        self.counter = 1
+        if self.shuffle:
+            self.constraints = random.shuffle(self.constraints)
+        self.__add_literals(self.constraints)
+
 
 class LiteralTransitivityManager(object):
     """
@@ -80,9 +105,9 @@ class LiteralTransitivityManager(object):
         self.dependencies = {}
         self.clauses = set()
 
-        self.__scan()
+        self.__process_dependencies()
 
-    def __scan(self):
+    def __process_dependencies(self):
         for lit in self.lt.literals():
             x, y = lit.split(' < ')
             self.__add_dependency(x, y)
@@ -216,7 +241,7 @@ def translate_pycosat(solution, lt):
 
 
 def solve_pycosat(constraints):
-    lt = LiteralTranslator()
+    lt = LiteralTranslator(constraints)
     cnf = reduce_pycosat(constraints, lt)
     sat = run_pycosat(cnf)
     assignments = translate_pycosat(sat, lt)
@@ -234,8 +259,54 @@ def solve_pycosat(constraints):
 TRANSITIVITY_KICK_FACTOR = 1.5
 
 
+class SimulatedAnnealingReduction(object):
+    """
+    Solution gives an ordering of wizards that satisfies all constraints.
+
+    R = SimulatedAnnealingReduction(constraints)
+    solution = R.solve()
+    """
+    def __init__(self, constraints):
+        self.constraints = constraints
+        self.t = len(constraints)
+
+    def cost(self, solution):
+        return len(self.constraints) - \
+               utils.num_constraints_satisfied(self.constraints, solution)
+
+    def search_neighborhood(self, solution):
+        """
+        Randomized search in the neighborhood of number of scans.
+        :param solution: original solution
+        :return: solution with new number of scans
+        """
+        return NotImplementedError
+
+    def solve(self):
+        solution = self._Solution([], 1)
+        while not utils.check(self.constraints, solution.ordering):
+            # Find solution s' in neighborhood of s
+            solution_p = self.search_neighborhood(solution)
+            delta = self.cost(solution_p) - self.cost(solution)
+            if delta < 0:
+                solution = solution_p
+            else:
+                r = math.e ** (- delta / self.t)
+                if random.random() < r:
+                    solution = solution_p
+            # Anneal by decreasing probability T.
+            self.t = self.t * 0.8
+
+        return solution.ordering
+
+    class _Solution(object):
+        def __init__(self, ordering, num_scans):
+            self.ordering = ordering
+            self.num_scans = num_scans
+
+
 def solve_pycosat_randomize(constraints):
-    lt = LiteralTranslator()
+    lt = LiteralTranslator(constraints)
     cnf = __scan_clauses_pycosat(constraints, lt)
 
     num_scans = 2

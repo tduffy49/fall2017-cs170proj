@@ -9,7 +9,7 @@ from solver import read_input, write_output, solve
 from sat_test import check
 
 # Determines whether tests should also write output of solution to file.
-SHOULD_WRITE_OUTPUT = True
+SHOULD_WRITE_OUTPUT = False
 
 
 def test_passed_input(file, dir):
@@ -40,6 +40,7 @@ class OutputTest(unittest.TestCase):
                 self.assertTrue(test_passed_input(file, dir))
                 print (file + ' passed.')
 
+    @unittest.skip('Heavy lifting here....')
     def test_staff_inputs(self):
         files = os.listdir(self.DIR_STAFF)
         files = sorted(files, key=str.lower)
@@ -48,6 +49,7 @@ class OutputTest(unittest.TestCase):
             self.assertTrue(test_passed_input(file, self.DIR_STAFF))
             print (file + ' passed.')
 
+    @unittest.skip('Even more heavy lifting...')
     def test_staff_inputs_precision(self):
         self.assertTrue(test_passed_input('staff_160.in', self.DIR_STAFF))
 

@@ -13,6 +13,7 @@ from satispy.solver import Minisat
 ======================================================================
 """
 
+
 def solve(num_wizards, num_constraints, wizards, constraints):
     """
     Write your algorithm here.
@@ -35,6 +36,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
    No need to change any code below this line
 ======================================================================
 """
+
 
 def read_input(filename):
     with open(filename) as f:
