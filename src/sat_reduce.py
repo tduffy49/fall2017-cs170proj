@@ -164,7 +164,7 @@ class LiteralConsistencyManager(object):
         self.lt = lt
 
     def constraints(self):
-        clauses = []
+        clauses = set()
         for lit in self.lt.literals():
             z, x = lit.split(' < ')
             negation = x + ' < ' + z
@@ -174,23 +174,23 @@ class LiteralConsistencyManager(object):
 
             m = self.lt.find_literal(lit)
             # Both cannot be true.
-            constraint = [-n, -m]
-            clauses.append(constraint)
+            constraint = (-n, -m)
+            clauses.add(constraint)
 
         return clauses
 
 def __scan_clauses_pycosat(constraints, lt):
-    cnf = []
+    cnf = set()
     for constraint in constraints:
         a, b, c = constraint
         x1 = lt.touch_literal('%s < %s' % (a, c))
         x2 = lt.touch_literal('%s < %s' % (c, a))
         x3 = lt.touch_literal('%s < %s' % (b, c))
         x4 = lt.touch_literal('%s < %s' % (c, b))
-        cnf.append([x1, x2])
-        cnf.append([x3, x4])
-        cnf.append([-x1, -x4])
-        cnf.append([-x2, -x3])
+        cnf.add((x1, x2))
+        cnf.add((x3, x4))
+        cnf.add((-x1, -x4))
+        cnf.add((-x2, -x3))
 
     return cnf
 
@@ -204,11 +204,11 @@ def reduce_pycosat(constraints, lt):
 
     T = LiteralTransitivityManager(lt)
     t_constraints = T.constraints()
-    cnf.extend(t_constraints)
+    result = list(cnf) + list(t_constraints)
 
     C = LiteralConsistencyManager(lt)
     c_constraints = C.constraints()
-    cnf.extend(c_constraints)
+    result += list(c_constraints)
 
     return cnf
 
@@ -254,17 +254,17 @@ def solve_pycosat_randomize(constraints):
     cnf = __scan_clauses_pycosat(constraints, lt)
 
     num_scans = 2
-    solution = []
+    solution = None
     while not check(constraints, solution):
         T = LiteralTransitivityManager(lt)
         t_constraints = T.constraints(num_iter=num_scans)
         C = LiteralConsistencyManager(lt)
         c_constraints = C.constraints()
-        sat_clauses = cnf + list(t_constraints) + c_constraints
-        print 'Reduced'
+        sat_clauses = list(cnf) + list(t_constraints) + list(c_constraints)
+
         sat = run_pycosat(sat_clauses)
-        print 'SAT solved'
         assignments = translate_pycosat(sat, lt)
+
         G = dg.build_graph(assignments)
         if nx.is_directed_acyclic_graph(G):
             solution = dg.linearize(G)
@@ -274,7 +274,6 @@ def solve_pycosat_randomize(constraints):
             # TODO: Bug found. Fix later.
             # Seems like this is not a DFS in Algorithms but an explore() operation that may not reach all nodes.
             solution = None
-        print 'DAG built'
 
         num_scans = int(min(TRANSITIVITY_SCAN_CAP, int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))))
 
