@@ -13,9 +13,14 @@ from satispy.solver import Minisat
 class TestPycosatReduction(unittest.TestCase):
     def test_reduce_pycosat(self):
         constraints = [("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")]
-        wizard_ordering = sat.solve_pycosat(constraints)
+        s1 = sat.solve_pycosat(constraints)
+        s2 = sat.solve_pycosat_randomize(constraints)
+        s3 = sat.SimulatedAnnealingReduction(constraints).solve()
 
-        self.assertTrue(utils.check(constraints, wizard_ordering))
+        self.assertTrue(utils.check(constraints, s1))
+        self.assertTrue(utils.check(constraints, s2))
+        self.assertTrue(utils.check(constraints, s3))
+
 
 class TestSatispyReduction(unittest.TestCase):
     def setUp(self):

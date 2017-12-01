@@ -281,7 +281,7 @@ class SimulatedAnnealingReduction(object):
 
     def cost(self, solution):
         return len(self.constraints) - \
-               utils.num_constraints_satisfied(self.constraints, solution)
+               utils.num_constraints_satisfied(self.constraints, solution.ordering)
 
     def search_neighborhood(self, solution):
         """
@@ -292,27 +292,30 @@ class SimulatedAnnealingReduction(object):
         :return: neighboring s' to s according to heuristics.
         """
         num_scans_p = int(math.ceil(solution.num_scans * random.choice([0.9, 2])))
-        num_clauses_p = int(solution.num_clauses * random.choice([0.1, 4]))
 
         L = LiteralTranslator(self.constraints)
         base_clauses = L.constraints()
         T = LiteralTransitivityManager(L)
         t_clauses = T.constraints(num_iter=num_scans_p)
-        # TODO: consistency manager may still add unneeded clauses since using same LiteralTranslator.
+        # TODO: ConsistencyManager C may still add unneeded clauses since using same LiteralTranslator.
         C = LiteralConsistencyManager(L)
         c_clauses = C.constraints()
 
+        num_clauses_p = min(int(solution.num_clauses * random.choice([0.8, 4])), len(t_clauses))
         t_clauses_p = random.sample(list(t_clauses), num_clauses_p)
         clauses = list(base_clauses) + list(t_clauses_p) + list(c_clauses)
         assignments = run_pycosat(clauses)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
         solution_p = self._Solution(ordering, num_scans_p, num_clauses_p)
+        print 'T_clauses_p: ' + str(len(t_clauses_p))
+        print len(c_clauses)
 
         return solution_p
 
     def solve(self):
-        solution = self._Solution([], 1, [])
+        solution = self._Solution([], 1, 1000)
+        num_iteration = 0
         while not utils.check(self.constraints, solution.ordering):
             # Find solution s' in neighborhood of s
             solution_p = self.search_neighborhood(solution)
@@ -323,6 +326,7 @@ class SimulatedAnnealingReduction(object):
                 r = math.e ** (- delta / self.t)
                 if random.random() < r:
                     solution = solution_p
+            num_iteration += 1
             # Anneal by decreasing probability T.
             self.t = self.t * 0.8
 
@@ -336,7 +340,7 @@ class SimulatedAnnealingReduction(object):
             """
             :param ordering: wizard ordering
             :param num_scans: number of scans
-            :param num_clauses: Number of transitivity clauses
+            :param num_clauses: number of transitivity clauses
             """
             self.ordering = ordering
             self.num_scans = num_scans
