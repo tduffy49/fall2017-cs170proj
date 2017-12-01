@@ -91,7 +91,7 @@ class LiteralTranslator(object):
         L = LiteralTranslator(self._constraints, len(self.literal_to_key) + len(other.literals()), self.shuffle)
         # TODO: How do we preserve translation ability when key conflicts?
         return NotImplementedError
-    
+
     def constraints(self):
         cnf = set()
         for constraint in self._constraints:
@@ -374,6 +374,10 @@ class SimulatedAnnealingReduction(object):
 
         return solution_p
 
+
+    # Simulated annealing factor, analogous to cooling glass (gets more rigid over time).
+    ANNEAL_FACTOR = 0.8
+
     def solve(self):
         solution = self._Solution([], 1, [])
         num_iteration = 0
@@ -389,7 +393,7 @@ class SimulatedAnnealingReduction(object):
                     solution = solution_p
             num_iteration += 1
             # Anneal by decreasing probability T.
-            self.t = self.t * 0.8
+            self.t = self.t * self.ANNEAL_FACTOR
 
         return solution.ordering
 
