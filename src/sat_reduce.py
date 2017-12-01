@@ -422,8 +422,11 @@ class SimulatedAnnealingReduction(object):
         :param constraints: [ (w1, w2, w3) ]
         """
         self.constraints = constraints
-        self.t = len(constraints)
+        self.t = self._initial_anneal()
         self.translator = LiteralTranslator(constraints)
+
+    def _initial_anneal(self):
+        return len(self.constraints)
 
     def cost(self, solution):
         """
@@ -455,12 +458,14 @@ class SimulatedAnnealingReduction(object):
         return RuntimeError
 
     # Neighborhood search heuristics.
-    T_CLAUSES_RETAIN_FACTOR = 0.0               # Retained clauses has to be less than scan decrease factor.
-    NUM_T_SCANS_DECREASE_FACTOR = 0.8
-    NUM_T_SCANS_INCREASE_FACTOR = 4
-    NUM_T_CLAUSES_DECREASE_FACTOR = 0.8         # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_FACTOR = 1.1         # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_INC = 10000          # Always increment clauses by certain amount.
+    T_CLAUSES_RETAIN_FACTOR = 0.98              # Retained clauses has to be less than scan decrease factor.
+    NUM_T_SCANS_DECREASE_FACTOR = 0.9
+    NUM_T_SCANS_INCREASE_FACTOR = 2
+    NUM_T_SCANS_CAP = 1000
+    NUM_T_CLAUSES_DECREASE_FACTOR = 0.5         # Number of total transitivity clauses.
+    NUM_T_CLAUSES_INCREASE_FACTOR = 3.5           # Number of total transitivity clauses.
+    NUM_T_CLAUSES_INCREASE_INC = 1000           # Always increment clauses by certain amount.
+    NUM_T_CLAUSES_CAP = 300000                  # Maximum number of transitivity clauses
 
     def search_neighborhood(self, solution):
         """
@@ -476,37 +481,44 @@ class SimulatedAnnealingReduction(object):
         C = ConstraintManager(self.translator)
         T = LiteralTransitivityManager(L)
 
-        num_t_clauses_p = int(
+        num_t_clauses_p = min(int(
             len(solution.t_clauses)
             * random.choice([self.NUM_T_CLAUSES_DECREASE_FACTOR, self.NUM_T_CLAUSES_INCREASE_FACTOR])
             + self.NUM_T_CLAUSES_INCREASE_INC
-        )
+        ), self.NUM_T_CLAUSES_CAP)
 
         # Allow neighborhood search by constraints kept.
         t_clauses_retained = random.sample(
             solution.t_clauses,
             int(min(num_t_clauses_p * self.T_CLAUSES_RETAIN_FACTOR, len(solution.t_clauses)))
         )
-        
-        num_t_scans_p = int(solution.num_t_scans
-                            * random.choice([self.NUM_T_SCANS_DECREASE_FACTOR, self.NUM_T_SCANS_INCREASE_FACTOR]))
-        t_clauses_p = t_clauses_retained + list(
-            T.constraints(num_iter=num_t_scans_p)
-        )
 
+        # print '(1) Bottleneck'
+        num_t_scans_p = min(
+                int(math.ceil(solution.num_t_scans
+                * random.choice([self.NUM_T_SCANS_DECREASE_FACTOR, self.NUM_T_SCANS_INCREASE_FACTOR]))),
+                self.NUM_T_SCANS_CAP)
+        t_clauses_scanned =list(T.constraints(num_iter=num_t_scans_p))
+        t_clauses_p = t_clauses_retained + t_clauses_scanned[
+                                           :min(num_t_clauses_p - len(t_clauses_retained), len(t_clauses_scanned))]
+
+        # print '(2) Bottleneck'
         clauses = base_clauses + t_clauses_p
         c_clauses_p = list(C.consistency_constraints(clauses))
         clauses = clauses + c_clauses_p
+        # print 'Total Clauses length: ' + str(len(clauses))
 
         assignments = run_pycosat(clauses)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
         solution_p = self._Solution(ordering, t_clauses_p, num_t_scans_p)
+        # print 'Cost: ' + str(self.cost(solution_p))
 
         return solution_p
 
     # Simulated annealing factor, analogous to cooling glass (gets more rigid over time).
-    ANNEAL_FACTOR = 0.98
+    ANNEAL_FACTOR = 0.9
+    NUM_ITER_ANNEAL_RESET = 10000
 
     def solve(self):
         """
@@ -527,6 +539,9 @@ class SimulatedAnnealingReduction(object):
             num_iteration += 1
             # Anneal by decreasing probability T.
             self.t = self.t * self.ANNEAL_FACTOR
+            if num_iteration > self.NUM_ITER_ANNEAL_RESET:
+                num_iteration = 0
+                # Reset anneal HERE if wanted.
 
         return solution.ordering
 

@@ -29,7 +29,7 @@ def linearize(dag):
     return list(nx.topological_sort(dag))
 
 
-def extract_linearize(g):
+def extract_dfs_linearize(g):
     """
     Returns all nodes of the graph in a DFS tree
     :param g: graph
@@ -47,3 +47,32 @@ def extract_linearize(g):
         result = list(tree_set) + result
 
     return result
+
+
+def extract_linearize(g):
+    """
+    Extract a DAG from g and returns topological ordering
+    :param g: DiGraph
+    :return: list of nodes
+    """
+    nodes = list(g.nodes())
+    random.shuffle(nodes)
+    set1, set2 = set(), set()
+    for edge in g.edges():
+        src, dest = edge
+        src_i, dest_i = nodes.index(src), nodes.index(dest)
+        if src_i > dest_i:
+            set1.add(edge)
+        else:
+            set2.add(edge)
+
+    # Choose set with larger edges.
+    G = nx.DiGraph()
+    G.add_nodes_from(g.nodes())
+    if len(set1) > len(set2):
+        G.add_edges_from(set1)
+    else:
+        G.add_edges_from(set2)
+
+    assert (nx.is_directed_acyclic_graph(G))
+    return linearize(G)
