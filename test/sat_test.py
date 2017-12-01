@@ -31,7 +31,7 @@ class TestPycosatReduction(unittest.TestCase):
     def test_reduce_pycosat(self):
         constraints = [("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")]
 
-        L = sat.LiteralTranslator()
+        L = sat.LiteralTranslator(constraints)
         cnf = sat.reduce_pycosat([("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")], L)
         solution = sat.run_pycosat(cnf)
         literals = sat.translate_pycosat(solution, L)

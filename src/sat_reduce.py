@@ -20,10 +20,26 @@ class LiteralTranslator(object):
     lt.translate(key)                       # "Harry < Hermione"
     lt.touch_literal("Harry < Hermione")    # `key`
     """
-    def __init__(self):
+    def __init__(self, constraints, shuffle=False):
         self.counter = 1
         self.literal_to_key = {}
         self.key_to_literal = {}
+
+        self.shuffle = shuffle
+        if shuffle:
+            self.constraints = random.shuffle(constraints)
+        else:
+            self.constraints = constraints
+        # Do a base scan of all constraints.
+        self.__add_constraints(constraints)
+
+    def __add_constraints(self, constraints):
+        for constraint in constraints:
+            a, b, c = constraint
+            self.touch_literal('%s < %s' % (a, c))
+            self.touch_literal('%s < %s' % (c, a))
+            self.touch_literal('%s < %s' % (b, c))
+            self.touch_literal('%s < %s' % (c, b))
 
     def __add_literal(self, literal):
         assert(literal not in self.literal_to_key)
@@ -35,7 +51,8 @@ class LiteralTranslator(object):
 
     def __add_literals(self, literals):
         for literal in literals:
-            self.__add_literal(literal)
+            if not literal in self.literal_to_key:
+                self.__add_literal(literal)
 
     def touch_literal(self, literal):
         """
@@ -65,6 +82,14 @@ class LiteralTranslator(object):
     def literals(self):
         return self.literal_to_key.keys()
 
+    def reset(self):
+        self.literal_to_key.clear()
+        self.key_to_literal.clear()
+        self.counter = 1
+        if self.shuffle:
+            self.constraints = random.shuffle(self.constraints)
+        self.__add_literals(self.constraints)
+
 
 class LiteralTransitivityManager(object):
     """
@@ -80,9 +105,9 @@ class LiteralTransitivityManager(object):
         self.dependencies = {}
         self.clauses = set()
 
-        self.__scan()
+        self.__process_dependencies()
 
-    def __scan(self):
+    def __process_dependencies(self):
         for lit in self.lt.literals():
             x, y = lit.split(' < ')
             self.__add_dependency(x, y)
@@ -216,7 +241,7 @@ def translate_pycosat(solution, lt):
 
 
 def solve_pycosat(constraints):
-    lt = LiteralTranslator()
+    lt = LiteralTranslator(constraints)
     cnf = reduce_pycosat(constraints, lt)
     sat = run_pycosat(cnf)
     assignments = translate_pycosat(sat, lt)
@@ -281,7 +306,7 @@ class SimulatedAnnealingReduction(object):
 
 
 def solve_pycosat_randomize(constraints):
-    lt = LiteralTranslator()
+    lt = LiteralTranslator(constraints)
     cnf = __scan_clauses_pycosat(constraints, lt)
 
     num_scans = 2
