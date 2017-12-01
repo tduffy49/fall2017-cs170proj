@@ -296,13 +296,18 @@ class SimulatedAnnealingReduction(object):
     Solution gives an ordering of wizards that satisfies all constraints.
 
     R = SimulatedAnnealingReduction(constraints)
-    solution = R.solve()
+    ordering = R.solve()
     """
     def __init__(self, constraints):
         self.constraints = constraints
         self.t = len(constraints)
 
     def cost(self, solution):
+        """
+        Cost is considered a 'badness' metric, here measured in the number of unsatisfied constraints.
+        :param solution: _Solution object
+        :return: cost of `solution`
+        """
         return len(self.constraints) - \
                utils.num_constraints_satisfied(self.constraints, solution.ordering)
 
@@ -379,6 +384,9 @@ class SimulatedAnnealingReduction(object):
     ANNEAL_FACTOR = 0.8
 
     def solve(self):
+        """
+        :return: list of wizards in order that satisfies ALL constraints
+        """
         solution = self._Solution([], 1, [])
         num_iteration = 0
         while not utils.check(self.constraints, solution.ordering):
