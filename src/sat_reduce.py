@@ -422,7 +422,7 @@ class SimulatedAnnealingReduction(object):
         :param constraints: [ (w1, w2, w3) ]
         """
         self.constraints = constraints
-        self.t = self._initial_anneal()
+        self.t = float(self._initial_anneal())
         self.translator = LiteralTranslator(constraints)
 
     def _initial_anneal(self):
@@ -457,17 +457,14 @@ class SimulatedAnnealingReduction(object):
 
         return RuntimeError
 
+    def __compute_retain_factor(self, solution):
+        return math.e ** (- self.cost(solution) * 2 / float(self.t))
+
     # Neighborhood search heuristics.
-    T_CLAUSES_RETAIN_FACTOR = 0.98              # Retained clauses has to be less than scan decrease factor.
-    NUM_T_SCANS_DECREASE_FACTOR = 0.9
-    NUM_T_SCANS_INCREASE_FACTOR = 2
-    NUM_T_SCANS_CAP = 1000
-    NUM_T_CLAUSES_DECREASE_FACTOR = 0.5         # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_FACTOR = 3.5           # Number of total transitivity clauses.
-    NUM_T_CLAUSES_INCREASE_INC = 1000           # Always increment clauses by certain amount.
+    T_CLAUSES_RETAIN_FACTOR = 0.98              # Retained clauses has to be less than scan decrease factor
     NUM_T_CLAUSES_CAP = 300000                  # Maximum number of transitivity clauses
 
-    def search_neighborhood(self, solution):
+    def search_neighborhood(self, solution, all_t_clauses):
         """
         Randomized search in the neighborhood of solution characteristics. Heuristics comprise
         of in order of importance:
@@ -478,41 +475,26 @@ class SimulatedAnnealingReduction(object):
         """
         L = self.translator
         base_clauses = list(L.base_clauses())
-        C = ConstraintManager(self.translator)
-        T = LiteralTransitivityManager(L)
-
-        num_t_clauses_p = min(int(
-            len(solution.t_clauses)
-            * random.choice([self.NUM_T_CLAUSES_DECREASE_FACTOR, self.NUM_T_CLAUSES_INCREASE_FACTOR])
-            + self.NUM_T_CLAUSES_INCREASE_INC
-        ), self.NUM_T_CLAUSES_CAP)
+        C = LiteralConsistencyManager(L)
+        # Number of transitivity clauses fixed always.
+        num_t_clauses_p = min(len(all_t_clauses), self.NUM_T_CLAUSES_CAP)
 
         # Allow neighborhood search by constraints kept.
         t_clauses_retained = random.sample(
             solution.t_clauses,
-            int(min(num_t_clauses_p * self.T_CLAUSES_RETAIN_FACTOR, len(solution.t_clauses)))
+            int(min(num_t_clauses_p * self.__compute_retain_factor(solution), len(solution.t_clauses)))
         )
+        t_clauses_p = t_clauses_retained + \
+            random.sample(all_t_clauses,
+                          min(num_t_clauses_p - len(t_clauses_retained), len(all_t_clauses)))
 
-        # print '(1) Bottleneck'
-        num_t_scans_p = min(
-                int(math.ceil(solution.num_t_scans
-                * random.choice([self.NUM_T_SCANS_DECREASE_FACTOR, self.NUM_T_SCANS_INCREASE_FACTOR]))),
-                self.NUM_T_SCANS_CAP)
-        t_clauses_scanned =list(T.constraints(num_iter=num_t_scans_p))
-        t_clauses_p = t_clauses_retained + t_clauses_scanned[
-                                           :min(num_t_clauses_p - len(t_clauses_retained), len(t_clauses_scanned))]
+        clauses_p = base_clauses + t_clauses_p
+        clauses_p += list(C.constraints(clauses_p))
 
-        # print '(2) Bottleneck'
-        clauses = base_clauses + t_clauses_p
-        c_clauses_p = list(C.consistency_constraints(clauses))
-        clauses = clauses + c_clauses_p
-        # print 'Total Clauses length: ' + str(len(clauses))
-
-        assignments = run_pycosat(clauses)
+        assignments = run_pycosat(clauses_p)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
-        solution_p = self._Solution(ordering, t_clauses_p, num_t_scans_p)
-        # print 'Cost: ' + str(self.cost(solution_p))
+        solution_p = self._Solution(ordering, t_clauses_p)
 
         return solution_p
 
@@ -524,24 +506,25 @@ class SimulatedAnnealingReduction(object):
         """
         :return: list of wizards in order that satisfies ALL constraints
         """
-        solution = self._Solution([], [], 1)
-        num_iteration = 0
+        # Solve for all constraints
+        T = LiteralTransitivityManager(self.translator)
+        all_t_constraints = T.constraints()
+
+        solution = self._Solution([], [])
         while not utils.check(self.constraints, solution.ordering):
-            # Find solution s' in neighborhood of s
-            solution_p = self.search_neighborhood(solution)
+            # Find solution s' in neighborhood of s. Adjust retain factor according
+            # to anneal factor.
+            solution_p = self.search_neighborhood(solution, all_t_constraints)
             delta = self.cost(solution_p) - self.cost(solution)
             if delta < 0:
                 solution = solution_p
             else:
-                r = math.e ** (- delta / self.t)
+                r = math.e ** (- delta / float(self.t))
                 if random.random() < r:
                     solution = solution_p
-            num_iteration += 1
+
             # Anneal by decreasing probability T.
             self.t = self.t * self.ANNEAL_FACTOR
-            if num_iteration > self.NUM_ITER_ANNEAL_RESET:
-                num_iteration = 0
-                # Reset anneal HERE if wanted.
 
         return solution.ordering
 
@@ -549,15 +532,14 @@ class SimulatedAnnealingReduction(object):
         """
         Shell object for simulated annealing.
         """
-        def __init__(self, ordering, t_clauses, num_t_scans):
+        def __init__(self, ordering, t_clauses):
             """
             :param ordering: wizard ordering
             :param t_clauses: transitivity clauses
-            :param num_t_scans: number of transitivity scans
             """
             self.ordering = ordering
             self.t_clauses = t_clauses
-            self.num_t_scans = num_t_scans
+
 
 def solve_pycosat_annealing(constraints):
     return SimulatedAnnealingReduction(constraints).solve()
