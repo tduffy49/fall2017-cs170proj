@@ -226,9 +226,9 @@ class LiteralConsistencyManager(object):
 
 def reduce_pycosat(constraints):
     """
-    :param constraints:
+    :param constraints: [ (w1, w2, w3) ]
     :param lt: a LiteralTranslator object
-    :return: normal form in Pycosat spec
+    :return: clauses in normal form according to PycoSat spec
     """
     L = LiteralTranslator(constraints)
     result = list(L.constraints())
@@ -273,6 +273,10 @@ def translate_pycosat(solution, lt, deterministic=True):
 
 
 def solve_pycosat(constraints):
+    """
+    :param constraints: [ (w1, w2, w3) ]
+    :return: wizard ordering that satisfies all constraints
+    """
     lt = LiteralTranslator(constraints)
     cnf = reduce_pycosat(constraints)
     sat = run_pycosat(cnf)
@@ -287,10 +291,6 @@ def solve_pycosat(constraints):
 # ========================
 
 
-# How many transitivity scans we do in the next iteration if current one fails.
-TRANSITIVITY_KICK_FACTOR = 4
-
-
 class SimulatedAnnealingReduction(object):
     """
     Solution gives an ordering of wizards that satisfies all constraints.
@@ -299,6 +299,9 @@ class SimulatedAnnealingReduction(object):
     ordering = R.solve()
     """
     def __init__(self, constraints):
+        """
+        :param constraints: [ (w1, w2, w3) ]
+        """
         self.constraints = constraints
         self.t = len(constraints)
 
@@ -373,12 +376,11 @@ class SimulatedAnnealingReduction(object):
 
         clauses = list(base_clauses) + list(t_clauses_p) + list(c_clauses)
         assignments = run_pycosat(clauses)
-        ordering = translate_pycosat(assignments, L, deterministic=False)
+        ordering = translate_pycosat(assignments, L, deterministic=False) # TODO: Bug here: retained t clauses...
 
         solution_p = self._Solution(ordering, num_scans_p, t_clauses_p)
 
         return solution_p
-
 
     # Simulated annealing factor, analogous to cooling glass (gets more rigid over time).
     ANNEAL_FACTOR = 0.8
@@ -420,8 +422,21 @@ class SimulatedAnnealingReduction(object):
             self.t_clauses = t_clauses
 
 
+def solve_pycosat_annealing(constraints):
+    return SimulatedAnnealingReduction(constraints).solve()
+
+
+# How many transitivity scans we do in the next iteration if current one fails.
+TRANSITIVITY_KICK_FACTOR = 4
+
+
 def solve_pycosat_randomize(constraints):
-    num_scans = 2
+    """
+    Simple randomization solver based on number of scans.
+    :param constraints: [ (w1, w2, w3) ]
+    :return: wizard ordering that satisfies all constraints
+    """
+    num_scans = 1
     solution = []
     while not utils.check(constraints, solution):
         lt = LiteralTranslator(constraints)
@@ -440,7 +455,3 @@ def solve_pycosat_randomize(constraints):
         num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
     return solution
-
-
-def solve_pycosat_annealing(constraints):
-    return SimulatedAnnealingReduction(constraints).solve()
