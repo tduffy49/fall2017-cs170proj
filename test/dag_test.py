@@ -4,7 +4,7 @@ import os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
-import src.dag_utils as dg
+import src.gutils as dg
 
 class TestDagMethods(unittest.TestCase):
 
