@@ -458,11 +458,11 @@ class SimulatedAnnealingReduction(object):
         return RuntimeError
 
     def __compute_retain_factor(self, solution):
-        return math.e ** (- self.cost(solution) * 2 / float(self.t))
+        return 1 - math.e ** (- utils.num_constraints_satisfied(self.constraints, solution.ordering) / self.t)
 
     # Neighborhood search heuristics.
     T_CLAUSES_RETAIN_FACTOR = 0.98              # Retained clauses has to be less than scan decrease factor
-    NUM_T_CLAUSES_CAP = 300000                  # Maximum number of transitivity clauses
+    NUM_T_CLAUSES_CAP = 200000                  # Maximum number of transitivity clauses
 
     def search_neighborhood(self, solution, all_t_clauses):
         """
@@ -490,7 +490,7 @@ class SimulatedAnnealingReduction(object):
 
         clauses_p = base_clauses + t_clauses_p
         clauses_p += list(C.constraints(clauses_p))
-
+        print 'SAT all clauses: ' + str(len(clauses_p))
         assignments = run_pycosat(clauses_p)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
@@ -520,11 +520,14 @@ class SimulatedAnnealingReduction(object):
                 solution = solution_p
             else:
                 r = math.e ** (- delta / float(self.t))
+                print ('R: ' + str(r))
                 if random.random() < r:
                     solution = solution_p
 
             # Anneal by decreasing probability T.
             self.t = self.t * self.ANNEAL_FACTOR
+            print 'Cost: ' + str(self.cost(solution))
+            print 'Retain factor: ' + str(self.__compute_retain_factor(solution))
 
         return solution.ordering
 
