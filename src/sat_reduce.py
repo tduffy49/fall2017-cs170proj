@@ -106,7 +106,7 @@ class LiteralTranslator(object):
             cnf.add((-x1, -x4))
             cnf.add((-x2, -x3))
 
-        return cnf
+        return list(cnf)
 
 
 class LiteralTransitivityManager(object):
@@ -154,15 +154,12 @@ class LiteralTransitivityManager(object):
             self.__add_dependency(y, x)
             self.clauses.add(constraint)
 
-    def constraints(self, num_iter=None, restart=False):
+    def constraints(self, num_iter=None):
         """
         The dependency chain assures that transitivity constraints
         are satisfied.
         :return: cnf clauses to enforce transitivity for all literals
         """
-        if restart:
-            self.clauses.clear()
-
         size = -1
         if num_iter:
             for _ in range(num_iter):
@@ -181,7 +178,7 @@ class LiteralTransitivityManager(object):
             for literal in self.lt.literals():
                 self.__enforce_dependencies(literal)
 
-        return self.clauses
+        return list(self.clauses)
 
 
 class LiteralConsistencyManager(object):
@@ -202,7 +199,7 @@ class LiteralConsistencyManager(object):
             constraint = (-n, -m)
             clauses.add(constraint)
 
-        return clauses
+        return list(clauses)
 
 
 def reduce_pycosat(constraints):
@@ -229,11 +226,12 @@ def run_pycosat(cnf):
     return ps.solve(cnf)
 
 
-def translate_pycosat(solution, lt):
+def translate_pycosat(solution, lt, deterministic=True):
     """
     Returns a list of string literals, i.e. ["Harry < Hermione", "Hermione < Dumbledore"]
     :param solution: solution in Pycosat spec
     :param lt: same LiteralTranslator object used for reduction
+    :param deterministic: may return incorrect solution if not so
     :return: literals that are true
     """
     literals = []
@@ -241,18 +239,25 @@ def translate_pycosat(solution, lt):
         if key > 0:
             literals.append(lt.translate(key))
 
-    return literals
+    G = gu.build_graph(literals)
+    if deterministic:
+        return gu.linearize(G)
+
+    if nx.is_directed_acyclic_graph(G):
+        solution = gu.linearize(G)
+    else:
+        solution = gu.extract_linearize(G)
+    return solution
 
 
 def solve_pycosat(constraints):
     lt = LiteralTranslator(constraints)
     cnf = reduce_pycosat(constraints)
     sat = run_pycosat(cnf)
-    assignments = translate_pycosat(sat, lt)
+    solution = translate_pycosat(sat, lt)
 
     # Deterministic reduction. Solution must be a DAG or cannot exist.
-    dag = gu.build_graph(assignments)
-    return gu.linearize(dag)
+    return solution
 
 # ========================
 # Pycosat Randomized
@@ -286,11 +291,25 @@ class SimulatedAnnealingReduction(object):
         :param solution: s
         :return: neighboring s' to s according to heuristics.
         """
-        L = LiteralTranslator(self.constraints)
-        base_clauses = L._constraints()
-        T = LiteralTransitivityManager(L)
+        num_scans_p = int(math.ceil(solution.num_scans * random.choice([0.9, 2])))
+        num_clauses_p = int(solution.num_clauses * random.choice([0.1, 4]))
 
-        return NotImplementedError
+        L = LiteralTranslator(self.constraints)
+        base_clauses = L.constraints()
+        T = LiteralTransitivityManager(L)
+        t_clauses = T.constraints(num_iter=num_scans_p)
+        # TODO: consistency manager may still add unneeded clauses since using same LiteralTranslator.
+        C = LiteralConsistencyManager(L)
+        c_clauses = C.constraints()
+
+        t_clauses_p = random.sample(list(t_clauses), num_clauses_p)
+        clauses = list(base_clauses) + list(t_clauses_p) + list(c_clauses)
+        assignments = run_pycosat(clauses)
+        ordering = translate_pycosat(assignments, L, deterministic=False)
+
+        solution_p = self._Solution(ordering, num_scans_p, num_clauses_p)
+
+        return solution_p
 
     def solve(self):
         solution = self._Solution([], 1, [])
@@ -313,10 +332,15 @@ class SimulatedAnnealingReduction(object):
         """
         Shell object for simulated annealing.
         """
-        def __init__(self, ordering, num_scans, sat_clauses):
+        def __init__(self, ordering, num_scans, num_clauses):
+            """
+            :param ordering: wizard ordering
+            :param num_scans: number of scans
+            :param num_clauses: Number of transitivity clauses
+            """
             self.ordering = ordering
             self.num_scans = num_scans
-            self.clauses = sat_clauses
+            self.num_clauses = num_clauses
 
 
 def solve_pycosat_randomize(constraints):
@@ -334,12 +358,7 @@ def solve_pycosat_randomize(constraints):
         sat_clauses = list(cnf) + list(t_constraints) + list(c_constraints)
         sat = run_pycosat(sat_clauses)
 
-        assignments = translate_pycosat(sat, lt)
-        G = gu.build_graph(assignments)
-        if nx.is_directed_acyclic_graph(G):
-            solution = gu.linearize(G)
-        else:
-            solution = gu.extract_linearize(G)
+        solution = translate_pycosat(sat, lt, deterministic=False)
 
         num_scans = int(math.ceil(num_scans * TRANSITIVITY_KICK_FACTOR))
 
