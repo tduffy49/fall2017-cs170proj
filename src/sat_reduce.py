@@ -245,19 +245,22 @@ def reduce_pycosat(constraints):
 
 
 def run_pycosat(cnf):
+    """
+    :param cnf: clauses in normal form
+    :return: satisfying assignments
+    """
     return ps.solve(cnf)
 
 
-def translate_pycosat(solution, lt, deterministic=True):
+def translate_pycosat(assignments, lt, deterministic=True):
     """
-    Returns a list of string literals, i.e. ["Harry < Hermione", "Hermione < Dumbledore"]
-    :param solution: solution in Pycosat spec
+    :param assignments: assignments from SAT solver
     :param lt: same LiteralTranslator object used for reduction
-    :param deterministic: may return incorrect solution if not so
-    :return: literals that are true
+    :param deterministic: if True, input is deterministically a DAG
+    :return: wizard ordering
     """
     literals = []
-    for key in solution:
+    for key in assignments:
         if key > 0:
             literals.append(lt.translate(key))
 
@@ -266,10 +269,10 @@ def translate_pycosat(solution, lt, deterministic=True):
         return gu.linearize(G)
 
     if nx.is_directed_acyclic_graph(G):
-        solution = gu.linearize(G)
+        assignments = gu.linearize(G)
     else:
-        solution = gu.extract_linearize(G)
-    return solution
+        assignments = gu.extract_linearize(G)
+    return assignments
 
 
 def solve_pycosat(constraints):
