@@ -15,7 +15,7 @@ class TestPycosatReduction(unittest.TestCase):
         constraints = [("Hermione", "Harry", "Dumbledore"), ("Hermione", "Dumbledore", "Harry")]
         s1 = sat.solve_pycosat(constraints)
         s2 = sat.solve_pycosat_randomize(constraints)
-        s3 = sat.SimulatedAnnealingReduction(constraints).solve()
+        s3 = sat.solve_pycosat_annealing(constraints)
 
         self.assertTrue(utils.check(constraints, s1))
         self.assertTrue(utils.check(constraints, s2))

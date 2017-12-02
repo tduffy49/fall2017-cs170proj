@@ -27,7 +27,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
-    return sr.SimulatedAnnealingReduction(constraints).solve()
+    return sr.solve_pycosat_annealing(constraints)
 
 
 

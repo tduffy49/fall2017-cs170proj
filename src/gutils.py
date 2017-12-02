@@ -29,31 +29,11 @@ def linearize(dag):
     return list(nx.topological_sort(dag))
 
 
-def extract_dfs_linearize(g):
+def extract_max_dag(g):
     """
-    Returns all nodes of the graph in a DFS tree
-    :param g: graph
-    :return: DFS tree
-    """
-    visited = set()
-    not_visited = set(g.nodes())
-    result = []
-    while len(visited) != g.number_of_nodes():
-        tree_set = set(nx.dfs_tree(g, random.sample(not_visited, 1)[0]))
-        not_visited = not_visited.difference(tree_set)
-        visited = visited.union(tree_set)
-
-        # Add to the beginning of list.
-        result = list(tree_set) + result
-
-    return result
-
-
-def extract_linearize(g):
-    """
-    Extract a DAG from g and returns topological ordering
-    :param g: DiGraph
-    :return: list of nodes
+    Extract a maximum edge DAG from `g` with approx. factor of 2
+    :param g: a DiGraph
+    :return: DAG
     """
     nodes = list(g.nodes())
     random.shuffle(nodes)
@@ -74,5 +54,26 @@ def extract_linearize(g):
     else:
         G.add_edges_from(set2)
 
-    assert (nx.is_directed_acyclic_graph(G))
-    return linearize(G)
+    return G
+
+
+def add_random_edges(dag, num):
+    """
+    :param dag: DAG
+    :param num: number of edges to add
+    :return: None
+    """
+    num_added = 0
+    ordering = linearize(dag)
+    while num_added < num:
+        i1 = random.randint(0, len(ordering))
+        i2 = random.randint(0, len(ordering))
+        if i1 == i2:
+            continue
+
+        n1, n2 = ordering[i1], ordering[i2]
+        if i1 < i2:
+            dag.add_edge(n1, n2)
+        else:
+            dag.add_edge(n2, n1)
+        num_added += 1

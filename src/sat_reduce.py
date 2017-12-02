@@ -368,6 +368,14 @@ def run_pycosat(cnf):
     return ps.solve(cnf)
 
 
+def translate_assignments(assignments, lt):
+    literals = []
+    for key in assignments:
+        if key > 0:
+            literals.append(lt.key_to_inequality(key))
+
+    return literals
+
 def translate_pycosat(assignments, lt, deterministic=True):
     """
     :param assignments: assignments from SAT solver
@@ -375,10 +383,7 @@ def translate_pycosat(assignments, lt, deterministic=True):
     :param deterministic: if True, input is deterministically a DAG
     :return: wizard ordering
     """
-    literals = []
-    for key in assignments:
-        if key > 0:
-            literals.append(lt.key_to_inequality(key))
+    literals = translate_assignments(assignments, lt)
 
     G = gu.build_graph(literals)
     if deterministic:
@@ -387,7 +392,8 @@ def translate_pycosat(assignments, lt, deterministic=True):
     if nx.is_directed_acyclic_graph(G):
         assignments = gu.linearize(G)
     else:
-        assignments = gu.extract_linearize(G)
+        dag = gu.extract_max_dag(G)
+        assignments = gu.linearize(dag)
     return assignments
 
 
@@ -408,6 +414,117 @@ def solve_pycosat(constraints):
 # ========================
 # Pycosat Randomized
 # ========================
+
+class SimulatedAnnealing(object):
+    """
+    An instance of SimulatedAnnealing problem
+    """
+    def __init__(self, problem):
+        self.problem = problem
+        self.t = self.__initial_anneal()
+
+    def __initial_anneal(self):
+        pass
+
+    def __initial_solution(self):
+        pass
+
+    def is_valid(self, solution):
+        pass
+
+    def cost(self, solution):
+        pass
+
+    def search_neighborhood(self, solution):
+        pass
+
+    anneal_reduction_factor = 0.9
+
+    def solve(self, num_iter=None):
+        """
+        :param num_iter: Number of iterations until solution returned.
+        May not be a valid solution.
+        :return:
+        """
+        solution = self.__initial_solution()
+        while not self.is_valid(solution):
+            solution_p = self.search_neighborhood(solution)
+            delta = self.cost(solution_p) - self.cost(solution)
+            if delta < 0:
+                solution = solution_p
+            else:
+                r = math.e ** (- delta / self.t)
+                if random.random() < r:
+                    solution = solution_p
+            self.t = self.t * self.anneal_reduction_factor
+
+        return solution
+
+class GraphAnnealing(SimulatedAnnealing):
+    """
+    Anneals the graph DAG extraction.
+    """
+    def __initial_anneal(self):
+        return 1.0
+
+    def __initial_solution(self):
+        G = gu.build_graph(self.problem.literals)
+        dag = gu.extract_max_dag(G)
+        ordering = gu.linearize(dag)
+
+        return self._Solution(dag, ordering)
+
+    def is_valid(self, solution):
+        return utils.check(self.problem.constraints, solution.ordering)
+
+    def cost(self, solution):
+        """
+        :param solution: _Solution
+        :return: non-negative float
+        """
+        return len(self.problem.constraints) \
+               - utils.num_constraints_satisfied(self.problem.constraints, solution)
+
+    edge_retain_factor = 0.9
+    def search_neighborhood(self, solution):
+        """
+        Retain a portion of edges to maintain solution in neighborhood.
+        Create new edges randomly while still maintaining a DAG.
+        :param solution: _Solution
+        :return: _Solution in neighborhood of `solution`
+        """
+        G = gu.build_graph(self.problem.literals)
+        edges_retained = random.sample(
+            list(solution.graph.edges()), int(solution.graph.number_of_edges()
+                                              * self.edge_retain_factor)
+        )
+
+        dag_p = nx.DiGraph()
+        dag_p.add_nodes_from(G)
+        dag_p.add_edges_from(edges_retained)
+
+        ordering_p = gu.linearize(dag_p)
+        gu.add_random_edges(dag_p, solution.graph.number_of_edges() - len(edges_retained))
+
+        return self._Solution(dag_p, ordering_p)
+
+    class _Problem(object):
+        """
+        Given a list of strings [ "w1 < w2" ], construct a DAG
+        out of them.
+        """
+        def __init__(self, literals, constraints):
+            """
+            :param literals: [ "w1 > w2" ]
+            :param constraints: [ (w1, w2, w3) ]
+            """
+            self.literals = literals
+            self.constraints = constraints
+
+    class _Solution(object):
+        def __init(self, graph, ordering):
+            self.graph = graph
+            self.ordering = ordering
 
 
 class SimulatedAnnealingReduction(object):
@@ -540,9 +657,23 @@ class SimulatedAnnealingReduction(object):
             self.ordering = ordering
             self.t_clauses = t_clauses
 
+NUM_PYCOSAT_LITERALS_CAP = 300000
 
 def solve_pycosat_annealing(constraints):
-    return SimulatedAnnealingReduction(constraints).solve()
+    L = LiteralTranslator(constraints)
+    T = LiteralTransitivityManager(constraints)
+    C = LiteralConsistencyManager(constraints)
+
+    t_clauses = T.constraints()
+    t_clauses = t_clauses[:min(len(t_clauses), NUM_PYCOSAT_LITERALS_CAP)]
+    all_clauses = list(L.base_clauses()) + list(t_clauses)
+    all_clauses += C.constraints(all_clauses)
+    assignments = run_pycosat(all_clauses)
+
+    p_ga = GraphAnnealing._Problem(translate_assignments(assignments), constraints)
+    Ga = GraphAnnealing(p_ga)
+
+    return Ga.solve().ordering
 
 
 # How many transitivity scans we do in the next iteration if current one fails.
