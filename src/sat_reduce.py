@@ -426,7 +426,7 @@ class SimulatedAnnealingReduction(object):
         self.translator = LiteralTranslator(constraints)
 
     def _initial_anneal(self):
-        return len(self.constraints)
+        return float(len(self.constraints))
 
     def cost(self, solution):
         """
@@ -520,14 +520,11 @@ class SimulatedAnnealingReduction(object):
                 solution = solution_p
             else:
                 r = math.e ** (- delta / float(self.t))
-                print ('R: ' + str(r))
                 if random.random() < r:
                     solution = solution_p
 
             # Anneal by decreasing probability T.
             self.t = self.t * self.ANNEAL_FACTOR
-            print 'Cost: ' + str(self.cost(solution))
-            print 'Retain factor: ' + str(self.__compute_retain_factor(solution))
 
         return solution.ordering
 
