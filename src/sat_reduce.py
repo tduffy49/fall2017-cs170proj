@@ -4,7 +4,8 @@ import utils, math, random
 import gutils as gu
 import pycosat as ps
 import networkx as nx
-
+import logging as log
+import time
 
 # ============================
 # PycoSat Reduction Objects
@@ -447,17 +448,34 @@ class SimulatedAnnealing(object):
         :return:
         """
         solution = self.initial_solution()
+        iter, num_swaps = 0, 0
         while not self.is_valid(solution):
             solution_p = self.search_neighborhood(solution)
             delta = self.cost(solution_p) - self.cost(solution)
             if delta < 0:
+                log.debug('[Stat] Cost: ' + str(self.cost(solution)))
+
                 solution = solution_p
+
+                log.debug('[Stat] New Cost: ' + str(self.cost(solution)))
             else:
                 r = math.e ** (- delta / self.t)
                 if random.random() < r:
-                    solution = solution_p
-            self.t = self.t * self.anneal_reduction_factor
+                    log.debug('[Stat] New Cost: ' + str(self.cost(solution)))
 
+                    solution = solution_p
+
+                    log.debug('[Stat] New Cost: ' + str(self.cost(solution)))
+                    log.debug('[Stat] Cost: ' + str(self.cost(solution)))
+                    num_swaps += 1
+            self.t = self.t * self.anneal_reduction_factor
+            iter += 1
+            if not iter < num_iter:
+                break
+
+        log.info('[Stat] Anneal iterations: ' + str(iter))
+        log.info('[Stat] T: ' + str(self.t))
+        log.info('[Stat] Number of swaps: ' + str(num_swaps))
         return solution
 
 
@@ -613,7 +631,7 @@ class SimulatedAnnealingReduction(object):
 
         clauses_p = base_clauses + t_clauses_p
         clauses_p += list(C.constraints(clauses_p))
-        print 'SAT all clauses: ' + str(len(clauses_p))
+
         assignments = run_pycosat(clauses_p)
         ordering = translate_pycosat(assignments, L, deterministic=False)
 
@@ -663,9 +681,16 @@ class SimulatedAnnealingReduction(object):
             self.ordering = ordering
             self.t_clauses = t_clauses
 
+
 NUM_PYCOSAT_LITERALS_CAP = 300000
 
+
 def solve_pycosat_annealing(constraints):
+    log.basicConfig(filename='logs/annealing_stats.log', filemode='w', level=log.DEBUG)
+    log.info('ANNEAL INSTANCE')
+    log.info('[Attr] Number of constraints: ' + str(len(constraints)))
+
+    start_time = time.time()
     L = LiteralTranslator(constraints)
     T = LiteralTransitivityManager(L)
     C = LiteralConsistencyManager(L)
@@ -674,10 +699,16 @@ def solve_pycosat_annealing(constraints):
     t_clauses = t_clauses[:min(len(t_clauses), NUM_PYCOSAT_LITERALS_CAP)]
     all_clauses = list(L.base_clauses()) + list(t_clauses)
     all_clauses += C.constraints(all_clauses)
-    assignments = run_pycosat(all_clauses)
+    log.info('[Time] Get constraints: ' + str(time.time() - start_time))
 
+    start_time = time.time()
+    assignments = run_pycosat(all_clauses)
+    log.info('[Time] SAT solved: ' + str(time.time() - start_time))
+
+    start_time = time.time()
     p_ga = GraphAnnealing._Problem(translate_assignments(assignments, L), constraints)
     Ga = GraphAnnealing(p_ga)
+    log.info('[Time] Annealing time: ' + str(time.time() - start_time))
 
     return Ga.solve().ordering
 

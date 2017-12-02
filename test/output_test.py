@@ -8,6 +8,7 @@ sys.path.append(
 from solver import read_input, write_output, solve
 from src.utils import check
 import logging as log
+import time
 
 # Determines whether tests should also write output of solution to file.
 SHOULD_WRITE_OUTPUT = True
@@ -34,16 +35,19 @@ class OutputTest(unittest.TestCase):
     DIR_STAFF = "staff_inputs"
 
     def test_inputs(self):
+        log.basicConfig(filename='logs/output_test.log', level=log.INFO)
         for dir in self.DIR_TESTS:
             files = os.listdir(dir)
             files = sorted(files, key=str.lower)
             for file in files:
+                start_time = time.time()
                 self.assertTrue(test_passed_input(file, dir))
-                print (file + ' passed.')
+                log.info(file + ' passed in: ' + str(time.time() - start_time))
         file = 'staff_060.in'
         self.assertTrue(test_passed_input(file, self.DIR_STAFF))
         print (file + ' passed.')
 
+    @unittest.skip('A lot...')
     def test_staff_inputs(self):
         files = os.listdir(self.DIR_STAFF)
         files = sorted(files, key=str.lower)

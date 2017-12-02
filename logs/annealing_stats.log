@@ -1,0 +1,278 @@
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 2
+INFO:root:[Time] Get constraints: 0.000416040420532
+INFO:root:[Time] SAT solved: 4.60147857666e-05
+INFO:root:[Time] Annealing time: 8.82148742676e-06
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.122676134109
+INFO:root:[Time] SAT solved: 0.0388169288635
+INFO:root:[Time] Annealing time: 9.79900360107e-05
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_0.in passed in: 0.170732975006
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 200
+INFO:root:[Time] Get constraints: 0.126666069031
+INFO:root:[Time] SAT solved: 0.0339019298553
+INFO:root:[Time] Annealing time: 0.000112056732178
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_1.in passed in: 0.166455030441
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 380
+INFO:root:[Time] Get constraints: 0.139003992081
+INFO:root:[Time] SAT solved: 0.0320909023285
+INFO:root:[Time] Annealing time: 0.000102996826172
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_2.in passed in: 0.178044080734
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 36
+INFO:root:[Time] Get constraints: 0.104470014572
+INFO:root:[Time] SAT solved: 0.0186669826508
+INFO:root:[Time] Annealing time: 0.000109910964966
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_3.in passed in: 0.128179073334
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 187
+INFO:root:[Time] Get constraints: 0.118447065353
+INFO:root:[Time] SAT solved: 0.0321481227875
+INFO:root:[Time] Annealing time: 0.000112056732178
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_4.in passed in: 0.156715869904
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 384
+INFO:root:[Time] Get constraints: 0.117343902588
+INFO:root:[Time] SAT solved: 0.0307900905609
+INFO:root:[Time] Annealing time: 9.89437103271e-05
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_5.in passed in: 0.154085159302
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.125565052032
+INFO:root:[Time] SAT solved: 0.0312638282776
+INFO:root:[Time] Annealing time: 0.000200033187866
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_6.in passed in: 0.163899183273
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 400
+INFO:root:[Time] Get constraints: 0.276862859726
+INFO:root:[Time] SAT solved: 0.0522451400757
+INFO:root:[Time] Annealing time: 0.000120878219604
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_7.in passed in: 0.336364030838
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 300
+INFO:root:[Time] Get constraints: 0.238054037094
+INFO:root:[Time] SAT solved: 0.0613300800323
+INFO:root:[Time] Annealing time: 0.000219821929932
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_8.in passed in: 0.313229799271
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 498
+INFO:root:[Time] Get constraints: 0.594506025314
+INFO:root:[Time] SAT solved: 0.0443160533905
+INFO:root:[Time] Annealing time: 0.000195980072021
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input20_9.in passed in: 0.650146961212
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.784557819366
+INFO:root:[Time] SAT solved: 0.132774829865
+INFO:root:[Time] Annealing time: 0.000303983688354
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_0.in passed in: 0.940807104111
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.730979919434
+INFO:root:[Time] SAT solved: 0.123168945312
+INFO:root:[Time] Annealing time: 0.000340938568115
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_1.in passed in: 0.870434999466
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 499
+INFO:root:[Time] Get constraints: 0.672207832336
+INFO:root:[Time] SAT solved: 0.122214078903
+INFO:root:[Time] Annealing time: 0.000421047210693
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_2.in passed in: 0.810697078705
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 1.49801206589
+INFO:root:[Time] SAT solved: 0.176265001297
+INFO:root:[Time] Annealing time: 0.000358819961548
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_3.in passed in: 1.69198513031
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.908340930939
+INFO:root:[Time] SAT solved: 0.119070053101
+INFO:root:[Time] Annealing time: 0.000349044799805
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_4.in passed in: 1.04290485382
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.793339967728
+INFO:root:[Time] SAT solved: 0.333075046539
+INFO:root:[Time] Annealing time: 0.000577926635742
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_5.in passed in: 1.15958809853
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.735723018646
+INFO:root:[Time] SAT solved: 0.159434080124
+INFO:root:[Time] Annealing time: 0.000386953353882
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_6.in passed in: 0.921638011932
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 400
+INFO:root:[Time] Get constraints: 0.625485897064
+INFO:root:[Time] SAT solved: 0.116212844849
+INFO:root:[Time] Annealing time: 0.000370979309082
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_7.in passed in: 0.760312080383
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 400
+INFO:root:[Time] Get constraints: 0.607375144958
+INFO:root:[Time] SAT solved: 0.106637001038
+INFO:root:[Time] Annealing time: 0.000365018844604
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_8.in passed in: 0.728852033615
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 400
+INFO:root:[Time] Get constraints: 0.628369808197
+INFO:root:[Time] SAT solved: 0.104460954666
+INFO:root:[Time] Annealing time: 0.000323057174683
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input35_9.in passed in: 0.748929977417
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 1.94134521484
+INFO:root:[Time] SAT solved: 0.481990814209
+INFO:root:[Time] Annealing time: 0.000734090805054
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_0.in passed in: 2.46157097816
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 1.99045801163
+INFO:root:[Time] SAT solved: 0.493696928024
+INFO:root:[Time] Annealing time: 0.000577926635742
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_1.in passed in: 2.53213810921
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 3.11316800117
+INFO:root:[Time] SAT solved: 0.481206893921
+INFO:root:[Time] Annealing time: 0.000657081604004
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_2.in passed in: 3.6520318985
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 2.29395580292
+INFO:root:[Time] SAT solved: 1.31094908714
+INFO:root:[Time] Annealing time: 0.00135588645935
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_3.in passed in: 3.71597504616
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 0.927893877029
+INFO:root:[Time] SAT solved: 0.0877590179443
+INFO:root:[Time] Annealing time: 0.000386953353882
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_4.in passed in: 1.03376603127
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 499
+INFO:root:[Time] Get constraints: 2.8598959446
+INFO:root:[Time] SAT solved: 0.456883907318
+INFO:root:[Time] Annealing time: 0.000735998153687
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_5.in passed in: 3.3536028862
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 2.61947417259
+INFO:root:[Time] SAT solved: 0.338377952576
+INFO:root:[Time] Annealing time: 0.00128602981567
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_6.in passed in: 3.04464006424
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 1.95802402496
+INFO:root:[Time] SAT solved: 0.354132890701
+INFO:root:[Time] Annealing time: 0.000756978988647
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_7.in passed in: 2.36613583565
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 350
+INFO:root:[Time] Get constraints: 2.3377430439
+INFO:root:[Time] SAT solved: 0.166934967041
+INFO:root:[Time] Annealing time: 0.000752925872803
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_8.in passed in: 2.54322695732
+INFO:root:ANNEAL INSTANCE
+INFO:root:[Attr] Number of constraints: 500
+INFO:root:[Time] Get constraints: 2.33332395554
+INFO:root:[Time] SAT solved: 0.787343978882
+INFO:root:[Time] Annealing time: 0.000800848007202
+INFO:root:[Stat] Anneal iterations: 0
+INFO:root:[Stat] T: 1.0
+INFO:root:[Stat] Number of swaps: 0
+INFO:root:input50_9.in passed in: 3.16324806213
