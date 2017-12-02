@@ -421,12 +421,12 @@ class SimulatedAnnealing(object):
     """
     def __init__(self, problem):
         self.problem = problem
-        self.t = self.__initial_anneal()
+        self.t = self.initial_anneal()
 
-    def __initial_anneal(self):
+    def initial_anneal(self):
         pass
 
-    def __initial_solution(self):
+    def initial_solution(self):
         pass
 
     def is_valid(self, solution):
@@ -446,7 +446,7 @@ class SimulatedAnnealing(object):
         May not be a valid solution.
         :return:
         """
-        solution = self.__initial_solution()
+        solution = self.initial_solution()
         while not self.is_valid(solution):
             solution_p = self.search_neighborhood(solution)
             delta = self.cost(solution_p) - self.cost(solution)
@@ -460,14 +460,15 @@ class SimulatedAnnealing(object):
 
         return solution
 
+
 class GraphAnnealing(SimulatedAnnealing):
     """
     Anneals the graph DAG extraction.
     """
-    def __initial_anneal(self):
+    def initial_anneal(self):
         return 1.0
 
-    def __initial_solution(self):
+    def initial_solution(self):
         G = gu.build_graph(self.problem.literals)
         dag = gu.extract_max_dag(G)
         ordering = gu.linearize(dag)
@@ -483,9 +484,10 @@ class GraphAnnealing(SimulatedAnnealing):
         :return: non-negative float
         """
         return len(self.problem.constraints) \
-               - utils.num_constraints_satisfied(self.problem.constraints, solution)
+               - utils.num_constraints_satisfied(self.problem.constraints, solution.ordering)
 
     edge_retain_factor = 0.9
+
     def search_neighborhood(self, solution):
         """
         Retain a portion of edges to maintain solution in neighborhood.
@@ -522,7 +524,7 @@ class GraphAnnealing(SimulatedAnnealing):
             self.constraints = constraints
 
     class _Solution(object):
-        def __init(self, graph, ordering):
+        def __init__(self, graph, ordering):
             self.graph = graph
             self.ordering = ordering
 
@@ -661,8 +663,8 @@ NUM_PYCOSAT_LITERALS_CAP = 300000
 
 def solve_pycosat_annealing(constraints):
     L = LiteralTranslator(constraints)
-    T = LiteralTransitivityManager(constraints)
-    C = LiteralConsistencyManager(constraints)
+    T = LiteralTransitivityManager(L)
+    C = LiteralConsistencyManager(L)
 
     t_clauses = T.constraints()
     t_clauses = t_clauses[:min(len(t_clauses), NUM_PYCOSAT_LITERALS_CAP)]
@@ -670,7 +672,7 @@ def solve_pycosat_annealing(constraints):
     all_clauses += C.constraints(all_clauses)
     assignments = run_pycosat(all_clauses)
 
-    p_ga = GraphAnnealing._Problem(translate_assignments(assignments), constraints)
+    p_ga = GraphAnnealing._Problem(translate_assignments(assignments, L), constraints)
     Ga = GraphAnnealing(p_ga)
 
     return Ga.solve().ordering

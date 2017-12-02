@@ -66,8 +66,8 @@ def add_random_edges(dag, num):
     num_added = 0
     ordering = linearize(dag)
     while num_added < num:
-        i1 = random.randint(0, len(ordering))
-        i2 = random.randint(0, len(ordering))
+        i1 = random.randint(0, len(ordering) - 1)
+        i2 = random.randint(0, len(ordering) - 1)
         if i1 == i2:
             continue
 
