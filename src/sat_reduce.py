@@ -470,6 +470,8 @@ class GraphAnnealing(SimulatedAnnealing):
 
     def initial_solution(self):
         G = gu.build_graph(self.problem.literals)
+        if nx.is_directed_acyclic_graph(G):
+            return self._Solution(G, gu.linearize(G))
         dag = gu.extract_max_dag(G)
         ordering = gu.linearize(dag)
 
@@ -486,7 +488,7 @@ class GraphAnnealing(SimulatedAnnealing):
         return len(self.problem.constraints) \
                - utils.num_constraints_satisfied(self.problem.constraints, solution.ordering)
 
-    edge_retain_factor = 0.9
+    edge_retain_factor = 0.7
 
     def search_neighborhood(self, solution):
         """
@@ -496,6 +498,8 @@ class GraphAnnealing(SimulatedAnnealing):
         :return: _Solution in neighborhood of `solution`
         """
         G = gu.build_graph(self.problem.literals)
+        if nx.is_directed_acyclic_graph(G):
+            return self._Solution(G, gu.linearize(G))
         edges_retained = random.sample(
             list(solution.graph.edges()), int(solution.graph.number_of_edges()
                                               * self.edge_retain_factor)
