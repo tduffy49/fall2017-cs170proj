@@ -7,6 +7,7 @@ sys.path.append(
 
 from solver import read_input, write_output, solve
 from src.utils import check
+import logging as log
 
 # Determines whether tests should also write output of solution to file.
 SHOULD_WRITE_OUTPUT = True
